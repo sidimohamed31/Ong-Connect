@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center py-4">
+        <h2 class="fw-bold text-primary">{{ t.dashboard }} - Admin</h2>
+        <p class="text-muted">{{ t.get('admin_dashboard_desc', 'Gérez les approbations des ONGs et des cas sociaux') }}
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Pending ONGs Section -->
+    <div class="col-12 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold text-info m-0">
+                <i class="bi bi-person-check me-2"></i>{{ t.pending_ongs }}
+                {% if pending_ongs %}
+                <span class="badge bg-info text-dark rounded-pill ms-2">{{ pending_ongs|length }}</span>
+                {% endif %}
+            </h4>
+        </div>
+
+        {% if pending_ongs %}
+        <div class="row g-3">
+            {% for ong in pending_ongs %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100 border-info border-2">
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold text-truncate mb-2">{{ ong.nom_ong }}</h6>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-envelope me-1"></i>{{ ong.email }}
+                        </p>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-telephone me-1"></i>{{ ong.telephone }}
+                        </p>
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-geo-alt me-1"></i>{{ ong.adresse }}
+                        </p>
+                        <p class="card-text small text-secondary mb-3">
+                            {% if ong.verification_doc_url %}
+                            <a href="{{ url_for('static', filename=ong.verification_doc_url) }}" target="_blank"
+                                class="btn btn-sm btn-outline-info w-100">
+                                <i class="bi bi-file-earmark-text me-1"></i>{{ t.verification_doc }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted"><i class="bi bi-file-x"></i> Pas de document</span>
+                            {% endif %}
+                        </p>
+                        <div class="d-flex gap-2">
+                            <form method="POST"
+                                action="{{ url_for('admin_ong_action', action='validate', id=ong.id_ong) }}"
+                                class="flex-fill">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-success btn-sm w-100">
+                                    <i class="bi bi-check-circle me-1"></i>{{ t.approve }}
+                                </button>
+                            </form>
+                            <form method="POST"
+                                action="{{ url_for('admin_ong_action', action='reject', id=ong.id_ong) }}"
+                                class="flex-fill">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-danger btn-sm w-100">
+                                    <i class="bi bi-x-circle me-1"></i>{{ t.reject }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-light text-center border">
+            <i class="bi bi-check-circle text-success fs-4 d-block mb-2"></i>
+            {{ t.get('no_pending_ongs', 'Aucune ONG en attente de validation.') }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Pending Social Cases Section -->
+    <div class="col-12 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold text-warning m-0">
+                <i class="bi bi-clock-history me-2"></i>{{ t.pending_cases }}
+                {% if pending_cases %}
+                <span class="badge bg-warning text-dark rounded-pill ms-2">{{ pending_cases|length }}</span>
+                {% endif %}
+            </h4>
+        </div>
+
+        {% if pending_cases %}
+        <div class="row g-3">
+            {% for case in pending_cases %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100 border-warning border-2">
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold text-truncate mb-2">{{ case.titre }}</h6>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-building me-1"></i>{{ case.nom_ong }}
+                        </p>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-calendar me-1"></i>{{ case.date_publication }}
+                        </p>
+                        <p class="card-text small text-secondary mb-3" style="max-height: 60px; overflow: hidden;">
+                            {{ case.description[:100] }}{% if case.description|length > 100 %}...{% endif %}
+                        </p>
+                        <div class="mb-3">
+                            <a href="{{ url_for('public_case_details', id=case.id_cas_social) }}"
+                                class="btn btn-sm btn-outline-primary w-100" target="_blank">
+                                <i class="bi bi-eye me-1"></i>{{ t.view_details }}
+                            </a>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <form method="POST" action="{{ url_for('approve_case', id=case.id_cas_social) }}"
+                                class="flex-fill">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-success btn-sm w-100">
+                                    <i class="bi bi-check-circle me-1"></i>{{ t.approve }}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('reject_case', id=case.id_cas_social) }}"
+                                class="flex-fill">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-danger btn-sm w-100">
+                                    <i class="bi bi-x-circle me-1"></i>{{ t.reject }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-light text-center border">
+            <i class="bi bi-check-circle text-success fs-4 d-block mb-2"></i>
+            {{ t.get('no_pending_cases', 'Aucun cas social en attente de validation.') }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- ONG Dashboard - Statistics and Analytics -->
+<div class="ong-dashboard-wrapper">
+    <div class="container mt-4">
+        <h2 class="mb-4"><i class="bi bi-graph-up me-2 text-primary"></i>{{ t.get('dashboard', 'Tableau de Bord' if lang
+            == 'fr' else 'لوحة التحكم') }}</h2>
+
+        <!-- Export Buttons -->
+        <div class="mb-4">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-danger" onclick="exportToPDF()">
+                    <i class="bi bi-file-pdf me-1"></i> {{ t.get('export_pdf', 'Exporter PDF' if lang == 'fr' else
+                    'تصدير PDF') }}
+                </button>
+                <button type="button" class="btn btn-outline-success" onclick="exportToExcel()">
+                    <i class="bi bi-file-excel me-1"></i> {{ t.get('export_excel', 'Exporter Excel' if lang == 'fr' else
+                    'تصدير Excel') }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Open/Closed Cases Stats -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="bi bi-folder-open me-2 text-primary"></i>
+                            {{ t.get('open_closed_cases', 'Cas Ouverts / Clos' if lang == 'fr' else 'الحالات المفتوحة /
+                            المغلقة') }}
+                        </h5>
+                        <canvas id="openClosedChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="bi bi-pie-chart-fill me-2 text-success"></i>
+                            {{ t.get('case_status', 'Statut des Cas' if lang == 'fr' else 'حالة القضايا') }}
+                        </h5>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="stat-number text-primary">{{ total_cases }}</div>
+                                <div class="stat-label">{{ t.get('total', 'Total' if lang == 'fr' else 'المجموع') }}
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-number text-warning">{{ urgent_cases }}</div>
+                                <div class="stat-label">{{ t.get('urgent', 'Urgent' if lang == 'fr' else 'عاجل') }}
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-number text-success">{{ resolved_cases }}</div>
+                                <div class="stat-label">{{ t.get('resolved', 'Résolu' if lang == 'fr' else 'محلول') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics by Zone -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="bi bi-geo-alt-fill me-2 text-info"></i>
+                            {{ t.get('stats_by_zone', 'Statistiques par Zone' if lang == 'fr' else 'إحصائيات حسب
+                            المنطقة') }}
+                        </h5>
+                        <canvas id="zoneChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cases Table -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="bi bi-list-ul me-2 text-secondary"></i>
+                            {{ t.get('cases_list', 'Liste des Cas' if lang == 'fr' else 'قائمة الحالات') }}
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="casesTable">
+                                <thead>
+                                    <tr>
+                                        <th>{{ t.get('title', 'Titre' if lang == 'fr' else 'العنوان') }}</th>
+                                        <th>{{ t.get('zone', 'Zone' if lang == 'fr' else 'المنطقة') }}</th>
+                                        <th>{{ t.get('status', 'Statut' if lang == 'fr' else 'الحالة') }}</th>
+                                        <th>{{ t.get('date', 'Date' if lang == 'fr' else 'التاريخ') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for case in cases %}
+                                    <tr onclick="window.location='{{ url_for('ong_case_details', id=case.id_cas_social) }}';"
+                                        style="cursor: pointer;">
+                                        <td><strong>{{ case.titre }}</strong></td>
+                                        <td><i class="bi bi-geo-alt me-1"></i>{{ case.adresse }}</td>
+                                        <td>
+                                            <span
+                                                class="badge {% if case.statut == 'Résolu' %}bg-success{% elif case.statut == 'Urgent' %}bg-danger{% else %}bg-primary{% endif %}">
+                                                {{ t.get(case.statut, case.statut) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ case.date_publication }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        text-transform: uppercase;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+</style>
+
+<!-- Data Block for JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script id="ong-stats-data" type="application/json">
+{
+    "translations": {
+        "open": {{ t.get("open", "Ouverts" if lang == "fr" else "مفتوح") | tojson }},
+        "closed": {{ t.get("closed", "Clos" if lang == "fr" else "مغلق") | tojson }},
+        "number_of_cases": {{ t.get("number_of_cases", "Nombre de cas" if lang == "fr" else "عدد الحالات") | tojson }},
+        "export_msg": {{ t.get("export_pdf_coming", "Fonctionnalité d'export PDF à venir" if lang == "fr" else "ميزة تصدير PDF قادمة") | tojson }}
+    },
+    "stats": {
+        "total": {{ total_cases }},
+        "resolved": {{ resolved_cases }}
+    },
+    "case_addresses": {{ cases | map(attribute='adresse') | list | tojson }}
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Load Data
+    const rawData = document.getElementById('ong-stats-data').textContent;
+    const data = JSON.parse(rawData);
+    const t = data.translations;
+    const stats = data.stats;
+
+    // Open/Closed Cases Chart
+    const openClosedCtx = document.getElementById('openClosedChart').getContext('2d');
+    const openClosedChart = new Chart(openClosedCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [t.open, t.closed],
+            datasets: [{
+                data: [stats.total - stats.resolved, stats.resolved],
+                backgroundColor: ['#0d6efd', '#198754'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Zone Statistics Chart
+    const zoneCtx = document.getElementById('zoneChart').getContext('2d');
+
+    // Group cases by zone
+    const zones = {};
+    const addresses = data.case_addresses;
+
+    if (addresses && Array.isArray(addresses)) {
+        addresses.forEach(addr => {
+            if (addr) {
+                zones[addr] = (zones[addr] || 0) + 1;
+            }
+        });
+    }
+
+    const zoneLabels = Object.keys(zones);
+    const zoneData = Object.values(zones);
+
+    const zoneChart = new Chart(zoneCtx, {
+        type: 'bar',
+        data: {
+            labels: zoneLabels,
+            datasets: [{
+                label: t.number_of_cases,
+                data: zoneData,
+                backgroundColor: '#17a2b8',
+                borderColor: '#138496',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Export functions
+    function exportToPDF() {
+        // Choose the element that you want to render as PDF
+        const element = document.querySelector('.ong-dashboard-wrapper');
+
+        // Choose the options for the PDF export
+        const opt = {
+            margin: 0.5,
+            filename: 'ong_dashboard_' + new Date().toISOString().split('T')[0] + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
+        };
+
+        // Generate the PDF
+        html2pdf().set(opt).from(element).save();
+    }
+
+    function exportToExcel() {
+        // Simple CSV export
+        let csv = 'Title,Zone,Status,Date\n';
+        const table = document.getElementById('casesTable');
+        const rows = table.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const rowData = Array.from(cells).map(cell => {
+                return '"' + cell.textContent.trim().replace(/"/g, '""') + '"';
+            });
+            csv += rowData.join(',') + '\n';
+        });
+
+        // Download
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'cases_export_' + new Date().toISOString().split('T')[0] + '.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+</script>
+{% endblock %}

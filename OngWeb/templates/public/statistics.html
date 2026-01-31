@@ -1,0 +1,397 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Public Statistics Dashboard -->
+<div class="public-stats-wrapper">
+    <div class="container mt-4">
+        <h2 class="mb-4"><i class="bi bi-graph-up me-2 text-primary"></i>{{ t.get('statistics', 'Statistiques' if lang
+            == 'fr' else 'إحصائيات') }}</h2>
+
+        <!-- Export Buttons -->
+        <div class="mb-4 no-pdf" data-html2canvas-ignore="true">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-danger" onclick="exportToPDF()">
+                    <i class="bi bi-file-pdf me-1"></i> {{ t.get('export_pdf', 'Exporter PDF' if lang == 'fr' else
+                    'تصدير PDF') }}
+                </button>
+                <button type="button" class="btn btn-outline-success" onclick="exportToExcel()">
+                    <i class="bi bi-file-excel me-1"></i> {{ t.get('export_excel', 'Exporter Excel' if lang == 'fr' else
+                    'تصدير Excel') }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Overview Stats -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="modern-stat-card stat-primary">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <div class="stat-value">{{ total_cases }}</div>
+                            <div class="stat-label">{{ t.get('total_cases', 'Total des Cas' if lang == 'fr' else 'مجموع
+                                الحالات') }}</div>
+                        </div>
+                        <div class="stat-icon-wrapper ms-auto">
+                            <i class="bi bi-folder-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="modern-stat-card stat-warning">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <div class="stat-value">{{ urgent_cases }}</div>
+                            <div class="stat-label">{{ t.get('urgent_cases', 'Cas Urgents' if lang == 'fr' else 'حالات
+                                طارئة') }}</div>
+                        </div>
+                        <div class="stat-icon-wrapper ms-auto">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="modern-stat-card stat-success">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <div class="stat-value">{{ resolved_cases }}</div>
+                            <div class="stat-label">{{ t.get('resolved_cases', 'Cas Résolus' if lang == 'fr' else 'حالات
+                                محلولة') }}</div>
+                        </div>
+                        <div class="stat-icon-wrapper ms-auto">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="modern-stat-card stat-info">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <div class="stat-value">{{ total_ongs }}</div>
+                            <div class="stat-label">{{ t.get('active_ongs', 'ONGs Actives' if lang == 'fr' else
+                                'المنظمات النشطة') }}</div>
+                        </div>
+                        <div class="stat-icon-wrapper ms-auto">
+                            <i class="bi bi-building-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="bi bi-folder-open me-2 text-primary"></i>
+                            {{ t.get('open_closed_cases', 'Cas Ouverts / Clos' if lang == 'fr' else 'الحالات المفتوحة /
+                            المغلقة') }}
+                        </h5>
+                        <canvas id="openClosedChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="bi bi-pie-chart-fill me-2 text-success"></i>
+                            {{ t.get('case_distribution', 'Distribution des Cas' if lang == 'fr' else 'توزيع الحالات')
+                            }}
+                        </h5>
+                        <canvas id="statusChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone Statistics Chart -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="bi bi-geo-alt-fill me-2 text-info"></i>
+                            {{ t.get('stats_by_wilaya', 'Statistiques par Wilaya' if lang == 'fr' else 'إحصائيات حسب
+                            الولاية') }}
+                        </h5>
+                        <canvas id="zoneChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cases Table -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="bi bi-list-ul me-2 text-secondary"></i>
+                            {{ t.get('recent_cases', 'Cas Récents' if lang == 'fr' else 'الحالات الأخيرة') }}
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="casesTable">
+                                <thead>
+                                    <tr>
+                                        <th>{{ t.get('title', 'Titre' if lang == 'fr' else 'العنوان') }}</th>
+                                        <th>{{ t.get('ong', 'ONG' if lang == 'fr' else 'المنظمة') }}</th>
+                                        <th>{{ t.get('wilaya', 'Wilaya' if lang == 'fr' else 'الولاية') }}</th>
+                                        <th>{{ t.get('moughataa', 'Moughataa' if lang == 'fr' else 'المقاطعة') }}</th>
+                                        <th>{{ t.get('status', 'Statut' if lang == 'fr' else 'الحالة') }}</th>
+                                        <th>{{ t.get('date', 'Date' if lang == 'fr' else 'التاريخ') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for case in cases[:20] %}
+                                    <tr data-url="{{ url_for('public_case_details', id=case.id_cas_social) }}"
+                                        style="cursor: pointer;" class="clickable-row">
+                                        <td><strong>{{ case.titre }}</strong></td>
+                                        <td><i class="bi bi-building me-1"></i>{{ case.nom_ong }}</td>
+                                        <td>{{ case.wilaya or '---' }}</td>
+                                        <td>{{ case.moughataa or '---' }}</td>
+                                        <td>
+                                            <span
+                                                class="badge {% if case.statut == 'Résolu' %}bg-success{% elif case.statut == 'Urgent' %}bg-danger{% else %}bg-primary{% endif %}">
+                                                {{ t.get(case.statut, case.statut) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ case.date_publication }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    /* PDF Export Specific Styles */
+    @media print {
+        .no-pdf {
+            display: none !important;
+        }
+
+        .break-avoid {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+    }
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<!-- Data Block for JS -->
+<script id="stats-data" type="application/json">
+{
+    "translations": {
+        "open": {{ t.get("open", "Ouverts" if lang == "fr" else "مفتوح") | tojson }},
+        "closed": {{ t.get("closed", "Clos" if lang == "fr" else "مغلق") | tojson }},
+        "urgent": {{ t.get("urgent", "Urgent" if lang == "fr" else "عاجل") | tojson }},
+        "in_progress": {{ t.get("in_progress", "En cours" if lang == "fr" else "جاري") | tojson }},
+        "resolved": {{ t.get("resolved", "Résolu" if lang == "fr" else "محلول") | tojson }},
+        "number_of_cases": {{ t.get("number_of_cases", "Nombre de cas" if lang == "fr" else "عدد الحالات") | tojson }},
+        "not_specified": {{ t.get("not_specified", "Non spécifié" if lang == "fr" else "غير محدد") | tojson }}
+    },
+    "stats": {
+        "total": {{ total_cases }},
+        "urgent": {{ urgent_cases }},
+        "resolved": {{ resolved_cases }}
+    },
+    "case_regions": [
+        {% for case in cases %}
+        {
+            "wilaya": {{ case.wilaya | tojson }},
+            "moughataa": {{ case.moughataa | tojson }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
+</script>
+
+<script>
+    // Load Data
+    const rawData = document.getElementById('stats-data').textContent;
+    const data = JSON.parse(rawData);
+    const t = data.translations;
+    const stats = data.stats;
+
+    // Open/Closed Cases Chart
+    const openClosedCtx = document.getElementById('openClosedChart').getContext('2d');
+    const openClosedChart = new Chart(openClosedCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [t.open, t.closed],
+            datasets: [{
+                data: [stats.total - stats.resolved, stats.resolved],
+                backgroundColor: ['#0d6efd', '#198754'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Status Distribution Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: [t.urgent, t.in_progress, t.resolved],
+            datasets: [{
+                data: [
+                    stats.urgent,
+                    stats.total - stats.urgent - stats.resolved,
+                    stats.resolved
+                ],
+                backgroundColor: ['#dc3545', '#ffc107', '#198754'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Zone Statistics Chart (Grouped by Wilaya)
+    const zoneCtx = document.getElementById('zoneChart').getContext('2d');
+
+    // Group cases by Wilaya
+    const wilayas = {};
+    const regions = data.case_regions;
+
+    if (regions && Array.isArray(regions)) {
+        regions.forEach(reg => {
+            const label = reg.wilaya || t.not_specified;
+            wilayas[label] = (wilayas[label] || 0) + 1;
+        });
+    }
+
+    const sortedWilayas = Object.entries(wilayas)
+        .sort((a, b) => b[1] - a[1]);
+
+    const zoneLabels = sortedWilayas.map(z => z[0]);
+    const zoneData = sortedWilayas.map(z => z[1]);
+
+    const zoneChart = new Chart(zoneCtx, {
+        type: 'bar',
+        data: {
+            labels: zoneLabels,
+            datasets: [{
+                label: t.number_of_cases,
+                data: zoneData,
+                backgroundColor: '#17a2b8',
+                borderColor: '#138496',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Export functions
+    function exportToPDF() {
+        const element = document.querySelector('.public-stats-wrapper');
+        const cards = element.querySelectorAll('.card, .modern-stat-card, canvas, h5');
+        cards.forEach(el => el.classList.add('break-avoid'));
+
+        const opt = {
+            margin: [0.5, 0.5],
+            filename: 'public_statistics_' + new Date().toISOString().split('T')[0] + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                scrollY: 0,
+                scrollX: 0
+            },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            cards.forEach(el => el.classList.remove('break-avoid'));
+        });
+    }
+
+    function exportToExcel() {
+        let csv = 'Title,ONG,Wilaya,Moughataa,Status,Date\n';
+        const table = document.getElementById('casesTable');
+        const rows = table.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const rowData = Array.from(cells).map(cell => {
+                return '"' + cell.textContent.trim().replace(/"/g, '""') + '"';
+            });
+            csv += rowData.join(',') + '\n';
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'public_statistics_' + new Date().toISOString().split('T')[0] + '.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    // Handle clickable table rows
+    document.querySelectorAll('.clickable-row').forEach(row => {
+        row.addEventListener('click', function () {
+            window.location = this.getAttribute('data-url');
+        });
+    });
+</script>
+{% endblock %}
