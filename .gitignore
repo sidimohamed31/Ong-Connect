@@ -1,0 +1,30 @@
+# =====================
+# Flutter
+# =====================
+.dart_tool/
+.flutter-plugins-dependencies
+build/
+**/build/
+
+# =====================
+# Node / Frontend
+# =====================
+node_modules/
+dist/
+
+# =====================
+# Backend / Env
+# =====================
+.env
+.env.local
+venv/
+__pycache__/
+*.pyc
+
+# =====================
+# IDE
+# =====================
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json

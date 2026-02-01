@@ -378,7 +378,8 @@ def init_db():
                     ('Santé', 'Domaine de la santé'), 
                     ('Éducation', 'Domaine de l\'éducation'), 
                     ('Logement', 'Domaine du logement'), 
-                    ('Alimentation', 'Domaine de l\'alimentation')
+                    ('Alimentation', 'Domaine de l\'alimentation'),
+                    ('Eau', 'Domaine de l\'eau')
                 ]
                 cursor.executemany("INSERT INTO categorie (nomCategorie, description) VALUES (%s, %s)", default_categories)
                 print("Default categories seeded.")
@@ -964,73 +965,7 @@ def public_beneficiaries():
                          filter_categories=categories,
                          filter_locations=locations)
 
-@app.route('/api/cases')
-def api_cases():
-    category = request.args.get('category')
-    ong_id = request.args.get('ong_id')
-    
-    with get_db() as conn:
-        with conn.cursor() as cursor:
-            # Base query - Only approved cases for public API
-            query = """
-                SELECT c.*, o.nom_ong, o.logo_url, o.email as ong_email, o.telephone as ong_phone, o.domaine_intervation,
-                       loc.wilaya, loc.moughataa,
-                       (SELECT file_url FROM media WHERE id_cas_social = c.id_cas_social LIMIT 1) as main_image,
-                       (SELECT GROUP_CONCAT(file_url) FROM media WHERE id_cas_social = c.id_cas_social) as all_images
-                FROM cas_social c
-                LEFT JOIN ong o ON c.id_ong = o.id_ong
-                LEFT JOIN (SELECT DISTINCT wilaya, moughataa FROM cas_social) loc ON c.wilaya = loc.wilaya AND c.moughataa = loc.moughataa
-                WHERE c.statut_approbation = 'approuvé'
-            """
-            params = []
-            
-            if category:
-                query += " AND o.domaine_intervation LIKE %s"
-                params.append(f"%{category}%")
-                
-            if ong_id:
-                query += " AND c.id_ong = %s"
-                params.append(ong_id)
-                
-            query += " ORDER BY c.date_publication DESC"
-            
-            cursor.execute(query, params)
-            cases = cursor.fetchall()
-            
-            # Format for JSON
-            formatted_cases = []
-            for case in cases:
-                location = {
-                    'lat': None,
-                    'lng': None,
-                    'wilaya': case.get('wilaya'),
-                    'moughataa': case.get('moughataa')
-                }
-                
-                images_list = case['all_images'].split(',') if case.get('all_images') else []
-                main_image = case.get('main_image')
-                
-                formatted_cases.append({
-                    'id': case['id_cas_social'],
-                    'title': case['titre'],
-                    'description': case['description'],
-                    'address': case['adresse'],
-                    'date': str(case['date_publication']),
-                    'status': case['statut'],
-                    'location': location,
-                    'ong': {
-                        'id': case['id_ong'],
-                        'name': case['nom_ong'],
-                        'logo': case['logo_url'],
-                        'email': case['ong_email'],
-                        'phone': case['ong_phone']
-                    },
-                    'category': case['domaine_intervation'],
-                    'image': main_image,
-                    'images': images_list
-                })
-                
-            return jsonify({'status': 'success', 'data': formatted_cases})
+# /api/cases is now handled by api_get_cases at the end of the file for better standardization.
 
 @app.route('/api/stats/beneficiaries')
 def api_beneficiary_stats():
@@ -3089,16 +3024,18 @@ def api_list_cases():
                     SELECT c.id_cas_social, c.titre, c.description, c.adresse, 
                            c.statut, c.date_publication, c.latitude, c.longitude,
                            o.id_ong, o.nom_ong, o.logo_url, o.telephone, o.email,
+                           cat.nomCategorie as category,
                            (SELECT file_url FROM media WHERE id_cas_social = c.id_cas_social LIMIT 1) as image
                     FROM cas_social c
                     LEFT JOIN ong o ON c.id_ong = o.id_ong
+                    LEFT JOIN categorie cat ON c.category_id = cat.idCategorie
                     WHERE c.statut_approbation = 'approuvé'
                 """
                 params = []
                 
                 if category:
-                    query += " AND o.domaine_intervation LIKE %s"
-                    params.append(f"%{category}%")
+                    query += " AND cat.nomCategorie = %s"
+                    params.append(category)
                 if ong_id:
                     query += " AND c.id_ong = %s"
                     params.append(ong_id)
@@ -3625,9 +3562,11 @@ def api_get_case_detail(id):
                 # Case details
                 query = """
                     SELECT c.*, 
-                           o.nom_ong, o.adresse as ong_address, o.telephone as ong_phone, o.email as ong_email, o.logo_url
+                           o.nom_ong, o.adresse as ong_address, o.telephone as ong_phone, o.email as ong_email, o.logo_url,
+                           cat.nomCategorie as category_name
                     FROM cas_social c
                     LEFT JOIN ong o ON c.id_ong = o.id_ong
+                    LEFT JOIN categorie cat ON c.category_id = cat.idCategorie
                     WHERE c.id_cas_social = %s
                 """
                 cursor.execute(query, (id,))
@@ -3662,6 +3601,7 @@ def api_get_case_detail(id):
                         'email': case['ong_email'],
                         'logo': f"{request.host_url.rstrip('/')}/static/{case['logo_url']}" if case.get('logo_url') else None
                     },
+                    'category': case['category_name'],
                     'image': f"{request.host_url.rstrip('/')}/static/{media[0]['file_url']}" if media and media[0].get('file_url') else None,
                     'images': [f"{request.host_url.rstrip('/')}/static/{m['file_url']}" for m in media if m.get('file_url')],
                 }
@@ -3739,4 +3679,6 @@ def api_get_statistics():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True)
+    # host='0.0.0.0' allows connections from external devices (your phone)
+    # port=3000 to match the mobile app configuration
+    app.run(host='0.0.0.0', port=3000, debug=True)
