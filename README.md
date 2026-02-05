@@ -1,342 +1,342 @@
 # ONG Connect
 
-![ONG Connect](https://img.shields.io/badge/Platform-Web%20%26%20Mobile-blue)
+![ONG Connect](https://img.shields.io/badge/Plateforme-Web%20%26%20Mobile-blue)
 ![Flutter](https://img.shields.io/badge/Flutter-3.10.3-02569B?logo=flutter)
 ![Flask](https://img.shields.io/badge/Flask-Python-000000?logo=flask)
-![License](https://img.shields.io/badge/License-MIT-green)
+![License](https://img.shields.io/badge/Licence-MIT-green)
 
-**ONG Connect** is a comprehensive platform that connects Non-Governmental Organizations (NGOs) with real community needs. The platform enables NGOs to register, publish social cases, and allows donors and visitors to browse and contribute to making a positive impact.
+**ONG Connect** est une plateforme complète qui connecte les Organisations Non Gouvernementales (ONG) aux besoins réels de la communauté. La plateforme permet aux ONG de s'inscrire, de publier des cas sociaux, et permet aux donateurs et visiteurs de parcourir et de contribuer à un impact positif.
 
-## 📋 Table of Contents
+## 📋 Table des Matières
 
-- [Features](#-features)
-- [Technology Stack](#-technology-stack)
-- [Project Structure](#-project-structure)
+- [Fonctionnalités](#-fonctionnalités)
+- [Stack Technologique](#-stack-technologique)
+- [Structure du Projet](#-structure-du-projet)
 - [Installation](#-installation)
-  - [Backend Setup](#backend-setup-flask-web-application)
-  - [Mobile App Setup](#mobile-app-setup-flutter)
-- [Usage](#-usage)
-- [API Documentation](#-api-documentation)
-- [Screenshots](#-screenshots)
-- [Contributing](#-contributing)
-- [License](#-license)
+  - [Configuration Backend](#configuration-backend-application-web-flask)
+  - [Configuration Application Mobile](#configuration-application-mobile-flutter)
+- [Utilisation](#-utilisation)
+- [Documentation API](#-documentation-api)
+- [Captures d'écran](#-captures-décran)
+- [Contribuer](#-contribuer)
+- [Licence](#-licence)
 - [Contact](#-contact)
 
-## ✨ Features
+## ✨ Fonctionnalités
 
-### For NGOs
-- **Registration & Validation**: NGOs can register with verification documents and await admin approval
-- **Case Management**: Create, edit, and manage social cases with rich media support
-- **Profile Management**: Maintain organization profiles with logos and contact information
-- **Analytics**: View statistics on published cases and impact metrics
+### Pour les ONG
+- **Inscription & Validation** : Les ONG peuvent s'inscrire avec des documents de vérification et attendre l'approbation de l'administrateur
+- **Gestion des Cas** : Créer, modifier et gérer des cas sociaux avec support multimédia enrichi
+- **Gestion de Profil** : Maintenir les profils d'organisation avec logos et informations de contact
+- **Analytiques** : Voir les statistiques sur les cas publiés et les métriques d'impact
 
-### For Administrators
-- **ONG Approval System**: Review and approve/reject pending NGO registrations
-- **Case Moderation**: Approve or reject social cases before they go public
-- **Dashboard**: Comprehensive analytics showing platform statistics
-- **User Management**: Manage administrators and ONG accounts
+### Pour les Administrateurs
+- **Système d'Approbation des ONG** : Examiner et approuver/rejeter les inscriptions d'ONG en attente
+- **Modération des Cas** : Approuver ou rejeter les cas sociaux avant leur publication
+- **Tableau de Bord** : Analytiques complètes montrant les statistiques de la plateforme
+- **Gestion des Utilisateurs** : Gérer les administrateurs et les comptes ONG
 
-### For Donors & Visitors
-- **Browse Cases**: Explore social cases by category, location, or urgency
-- **Advanced Filtering**: Filter cases by wilaya (region), moughataa (district), status, and category
-- **Interactive Map**: View cases on an interactive map with geolocation
-- **Multi-language Support**: Available in Arabic (العربية), French (Français), and English
-- **Case Details**: View detailed information including beneficiaries, media gallery, and contact info
+### Pour les Donateurs & Visiteurs
+- **Parcourir les Cas** : Explorer les cas sociaux par catégorie, localisation ou urgence
+- **Filtrage Avancé** : Filtrer les cas par wilaya (région), moughataa (district), statut et catégorie
+- **Carte Interactive** : Voir les cas sur une carte interactive avec géolocalisation
+- **Support Multilingue** : Disponible en Arabe (العربية), Français et Anglais
+- **Détails des Cas** : Voir les informations détaillées incluant bénéficiaires, galerie média et infos contact
 
-### General Features
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
-- **Real-time Statistics**: Live charts showing impact by sector and organization
-- **Secure Authentication**: Password hashing, CSRF protection, and JWT tokens for mobile
-- **Media Gallery**: Support for images and videos in case presentations
-- **Pagination**: Efficient data loading with pagination support
+### Fonctionnalités Générales
+- **Design Responsive** : Fonctionne parfaitement sur ordinateur, tablette et mobile
+- **Statistiques en Temps Réel** : Graphiques en direct montrant l'impact par secteur et organisation
+- **Authentification Sécurisée** : Hachage de mots de passe, protection CSRF et tokens JWT pour mobile
+- **Galerie Média** : Support pour images et vidéos dans les présentations de cas
+- **Pagination** : Chargement de données efficace avec support de pagination
 
-## 🛠 Technology Stack
+## 🛠 Stack Technologique
 
-### Backend (Web Application)
-- **Framework**: Flask (Python)
-- **Database**: MySQL (PyMySQL)
-- **Authentication**: Werkzeug Security (password hashing)
-- **API**: RESTful API with CORS support
-- **ORM**: Direct SQL queries with PyMySQL
+### Backend (Application Web)
+- **Framework** : Flask (Python)
+- **Base de Données** : MySQL (PyMySQL)
+- **Authentification** : Werkzeug Security (hachage de mots de passe)
+- **API** : API RESTful avec support CORS
+- **ORM** : Requêtes SQL directes avec PyMySQL
 
 ### Frontend (Web)
-- **Templating**: Jinja2
-- **Styling**: CSS with RTL support for Arabic
-- **JavaScript**: Vanilla JS for interactivity
-- **Charts**: Chart visualization libraries
+- **Templates** : Jinja2
+- **Styles** : CSS avec support RTL pour l'arabe
+- **JavaScript** : Vanilla JS pour l'interactivité
+- **Graphiques** : Bibliothèques de visualisation de graphiques
 
-### Mobile Application
-- **Framework**: Flutter 3.10.3
-- **Language**: Dart
-- **State Management**: Built-in Flutter state management
-- **HTTP Client**: http package
-- **Key Dependencies**:
-  - `flutter_map` & `latlong2` - Interactive maps
-  - `cached_network_image` - Image caching
-  - `fl_chart` - Statistics visualization
-  - `shimmer` - Loading animations
-  - `photo_view` - Image viewing
-  - `google_fonts` - Typography
-  - `flutter_localizations` - Multi-language support
-  - `share_plus` - Share functionality
-  - `url_launcher` - Call and email integration
+### Application Mobile
+- **Framework** : Flutter 3.10.3
+- **Langage** : Dart
+- **Gestion d'État** : Gestion d'état Flutter intégrée
+- **Client HTTP** : package http
+- **Dépendances Clés** :
+  - `flutter_map` & `latlong2` - Cartes interactives
+  - `cached_network_image` - Mise en cache d'images
+  - `fl_chart` - Visualisation de statistiques
+  - `shimmer` - Animations de chargement
+  - `photo_view` - Visualisation d'images
+  - `google_fonts` - Typographie
+  - `flutter_localizations` - Support multilingue
+  - `share_plus` - Fonctionnalité de partage
+  - `url_launcher` - Intégration appel et email
 
-## 📁 Project Structure
+## 📁 Structure du Projet
 
 ```
 Ong-Connect/
-├── OngWeb/                    # Backend Flask application
-│   ├── static/                # Static files (CSS, JS, uploads)
-│   │   └── uploads/          # User uploads (media, logos, docs)
-│   ├── templates/             # Jinja2 HTML templates
-│   ├── app.py                 # Main Flask application
-│   ├── config.py              # Configuration settings
-│   ├── locations_data.py      # Mauritania location data
-│   └── requirements.txt       # Python dependencies (if exists)
+├── OngWeb/                    # Application Flask backend
+│   ├── static/                # Fichiers statiques (CSS, JS, uploads)
+│   │   └── uploads/          # Uploads utilisateurs (média, logos, docs)
+│   ├── templates/             # Templates HTML Jinja2
+│   ├── app.py                 # Application Flask principale
+│   ├── config.py              # Paramètres de configuration
+│   ├── locations_data.py      # Données de localisation Mauritanie
+│   └── requirements.txt       # Dépendances Python (si existe)
 │
-├── OngMobile/                 # Flutter mobile application
+├── OngMobile/                 # Application mobile Flutter
 │   ├── lib/
-│   │   ├── core/             # Core utilities and constants
-│   │   │   ├── constants/    # API constants
-│   │   │   └── theme/        # App theming
-│   │   ├── data/             # Data layer
-│   │   │   ├── models/       # Data models
-│   │   │   └── services/     # API and auth services
-│   │   ├── l10n/             # Localization files
-│   │   ├── presentation/     # UI layer
-│   │   │   ├── screens/      # App screens
-│   │   │   └── widgets/      # Reusable widgets
-│   │   └── main.dart         # App entry point
-│   ├── android/              # Android-specific files
-│   ├── ios/                  # iOS-specific files
-│   ├── pubspec.yaml          # Flutter dependencies
-│   └── l10n.yaml             # Localization configuration
+│   │   ├── core/             # Utilitaires et constantes de base
+│   │   │   ├── constants/    # Constantes API
+│   │   │   └── theme/        # Thème de l'application
+│   │   ├── data/             # Couche de données
+│   │   │   ├── models/       # Modèles de données
+│   │   │   └── services/     # Services API et authentification
+│   │   ├── l10n/             # Fichiers de localisation
+│   │   ├── presentation/     # Couche UI
+│   │   │   ├── screens/      # Écrans de l'application
+│   │   │   └── widgets/      # Widgets réutilisables
+│   │   └── main.dart         # Point d'entrée de l'application
+│   ├── android/              # Fichiers spécifiques Android
+│   ├── ios/                  # Fichiers spécifiques iOS
+│   ├── pubspec.yaml          # Dépendances Flutter
+│   └── l10n.yaml             # Configuration de localisation
 │
-├── .gitignore                # Git ignore file
-└── README.md                 # This file
+├── .gitignore                # Fichier Git ignore
+└── README.md                 # Ce fichier
 ```
 
 ## 🚀 Installation
 
-### Prerequisites
-- **Backend**: Python 3.7+, MySQL
-- **Mobile**: Flutter SDK 3.10.3+, Android Studio/Xcode
+### Prérequis
+- **Backend** : Python 3.7+, MySQL
+- **Mobile** : Flutter SDK 3.10.3+, Android Studio/Xcode
 
-### Backend Setup (Flask Web Application)
+### Configuration Backend (Application Web Flask)
 
-1. **Clone the repository**
+1. **Cloner le dépôt**
    ```bash
    git clone https://github.com/sidimohamed31/Ong-Connect.git
    cd Ong-Connect/OngWeb
    ```
 
-2. **Create a virtual environment**
+2. **Créer un environnement virtuel**
    ```bash
    python -m venv venv
    ```
 
-3. **Activate the virtual environment**
-   - Windows:
+3. **Activer l'environnement virtuel**
+   - Windows :
      ```bash
      venv\Scripts\activate
      ```
-   - macOS/Linux:
+   - macOS/Linux :
      ```bash
      source venv/bin/activate
      ```
 
-4. **Install dependencies**
+4. **Installer les dépendances**
    ```bash
    pip install flask pymysql flask-cors werkzeug
    ```
 
-5. **Configure database**
-   - Create a MySQL database named `ong_connecte`
-   - Update `config.py` with your database credentials:
+5. **Configurer la base de données**
+   - Créer une base de données MySQL nommée `ong_connecte`
+   - Mettre à jour `config.py` avec vos identifiants de base de données :
      ```python
      DB_HOST = 'localhost'
-     DB_USER = 'your_username'
-     DB_PASSWORD = 'your_password'
+     DB_USER = 'votre_nom_utilisateur'
+     DB_PASSWORD = 'votre_mot_de_passe'
      DB_NAME = 'ong_connecte'
      ```
 
-6. **Initialize database**
+6. **Initialiser la base de données**
    ```bash
    python -c "from app import init_db; init_db()"
    ```
 
-7. **Create default admin (optional)**
-   - Visit: `http://localhost:5000/create_default_admin`
-   - Default credentials: `admin@ongconnect.com` / `admin123`
+7. **Créer un administrateur par défaut (optionnel)**
+   - Visiter : `http://localhost:5000/create_default_admin`
+   - Identifiants par défaut : `admin@ongconnect.com` / `admin123`
 
-8. **Run the application**
+8. **Lancer l'application**
    ```bash
    python app.py
    ```
-   The web application will be available at `http://localhost:5000`
+   L'application web sera disponible sur `http://localhost:5000`
 
-### Mobile App Setup (Flutter)
+### Configuration Application Mobile (Flutter)
 
-1. **Navigate to mobile directory**
+1. **Naviguer vers le répertoire mobile**
    ```bash
    cd ../OngMobile
    ```
 
-2. **Install Flutter dependencies**
+2. **Installer les dépendances Flutter**
    ```bash
    flutter pub get
    ```
 
-3. **Update API endpoint**
-   - Open `lib/core/constants/api_constants.dart`
-   - Update the base URL to your backend server:
+3. **Mettre à jour le point de terminaison API**
+   - Ouvrir `lib/core/constants/api_constants.dart`
+   - Mettre à jour l'URL de base vers votre serveur backend :
      ```dart
-     static const String baseUrl = 'http://your-server-ip:5000';
+     static const String baseUrl = 'http://votre-ip-serveur:5000';
      ```
 
-4. **Run the app**
-   - For Android:
+4. **Lancer l'application**
+   - Pour Android :
      ```bash
      flutter run
      ```
-   - For iOS:
+   - Pour iOS :
      ```bash
      flutter run -d ios
      ```
-   - For specific device:
+   - Pour un appareil spécifique :
      ```bash
-     flutter devices  # List available devices
+     flutter devices  # Lister les appareils disponibles
      flutter run -d <device-id>
      ```
 
-## 📱 Usage
+## 📱 Utilisation
 
-### For NGOs
+### Pour les ONG
 
-1. **Register**
-   - Launch the mobile app or visit the web portal
-   - Click "Register Now" and fill in your organization details
-   - Upload verification documents
-   - Wait for admin approval
+1. **S'inscrire**
+   - Lancer l'application mobile ou visiter le portail web
+   - Cliquer sur "Inscrivez-vous maintenant" et remplir les détails de votre organisation
+   - Télécharger les documents de vérification
+   - Attendre l'approbation de l'administrateur
 
-2. **Login & Manage Cases**
-   - Login with your approved credentials
-   - Navigate to "My Cases" to view existing cases
-   - Click "Add Case" to create a new social case
-   - Fill in case details, select category, and add media
-   - Submit for admin approval
+2. **Connexion & Gestion des Cas**
+   - Se connecter avec vos identifiants approuvés
+   - Naviguer vers "Mes cas sociaux" pour voir les cas existants
+   - Cliquer sur "Ajouter un cas" pour créer un nouveau cas social
+   - Remplir les détails du cas, sélectionner la catégorie et ajouter des médias
+   - Soumettre pour approbation de l'administrateur
 
-3. **Track Impact**
-   - View statistics on your profile page
-   - Monitor case status (In Progress, Urgent, Resolved)
+3. **Suivre l'Impact**
+   - Voir les statistiques sur votre page de profil
+   - Surveiller le statut des cas (En cours, Urgent, Résolu)
 
-### For Administrators
+### Pour les Administrateurs
 
-1. **Login**
-   - Access the admin portal at `/admin_login`
-   - Use your admin credentials
+1. **Connexion**
+   - Accéder au portail admin sur `/admin_login`
+   - Utiliser vos identifiants administrateur
 
-2. **Approve Organizations**
-   - Navigate to "Pending ONGs"
-   - Review verification documents
-   - Approve or reject registrations
+2. **Approuver les Organisations**
+   - Naviguer vers "ONGs en attente de validation"
+   - Examiner les documents de vérification
+   - Approuver ou rejeter les inscriptions
 
-3. **Moderate Cases**
-   - Go to "Pending Cases"
-   - Review case details and media
-   - Approve for public visibility or reject
+3. **Modérer les Cas**
+   - Aller dans "Cas en attente de révision"
+   - Examiner les détails et médias des cas
+   - Approuver pour visibilité publique ou rejeter
 
-### For Donors/Visitors
+### Pour les Donateurs/Visiteurs
 
-1. **Browse Cases** (No login required)
-   - Open the mobile app or visit the public dashboard
-   - Browse latest social cases
-   - Use filters to find specific cases by:
-     - Category (Health, Education, Housing, Food, Water)
-     - Location (Wilaya & Moughataa)
-     - Status (In Progress, Urgent, Resolved)
-     - NGO
+1. **Parcourir les Cas** (Aucune connexion requise)
+   - Ouvrir l'application mobile ou visiter le tableau de bord public
+   - Parcourir les derniers cas sociaux
+   - Utiliser les filtres pour trouver des cas spécifiques par :
+     - Catégorie (Santé, Éducation, Logement, Alimentation, Eau)
+     - Localisation (Wilaya & Moughataa)
+     - Statut (En cours, Urgent, Résolu)
+     - ONG
 
-2. **View Details**
-   - Tap on any case card to see full details
-   - View beneficiary information
-   - Browse media gallery
-   - Contact the ONG directly via call or email
+2. **Voir les Détails**
+   - Appuyer sur une carte de cas pour voir tous les détails
+   - Voir les informations sur les bénéficiaires
+   - Parcourir la galerie média
+   - Contacter l'ONG directement par appel ou email
 
-3. **View on Map**
-   - Navigate to Map screen
-   - See all cases with geolocation markers
-   - Tap markers for quick case info
+3. **Voir sur la Carte**
+   - Naviguer vers l'écran Carte
+   - Voir tous les cas avec marqueurs de géolocalisation
+   - Appuyer sur les marqueurs pour info rapide du cas
 
-## 🔌 API Documentation
+## 🔌 Documentation API
 
-The backend provides RESTful API endpoints for mobile app integration:
+Le backend fournit des points de terminaison API RESTful pour l'intégration de l'application mobile :
 
-### Authentication
-- `POST /api/auth/login` - Login (ONG or Admin)
-- `POST /api/auth/register` - Register new ONG
+### Authentification
+- `POST /api/auth/login` - Connexion (ONG ou Admin)
+- `POST /api/auth/register` - Inscrire une nouvelle ONG
 
-### Social Cases
-- `GET /api/cases` - Get all approved cases (with pagination & filters)
-- `GET /api/cases/<id>` - Get case details
-- `POST /api/cases` - Create new case (ONG only)
-- `PUT /api/cases/<id>` - Update case (ONG only)
-- `DELETE /api/cases/<id>` - Delete case (ONG only)
+### Cas Sociaux
+- `GET /api/cases` - Obtenir tous les cas approuvés (avec pagination & filtres)
+- `GET /api/cases/<id>` - Obtenir les détails d'un cas
+- `POST /api/cases` - Créer un nouveau cas (ONG uniquement)
+- `PUT /api/cases/<id>` - Mettre à jour un cas (ONG uniquement)
+- `DELETE /api/cases/<id>` - Supprimer un cas (ONG uniquement)
 
-### Categories
-- `GET /api/categories` - Get all categories
+### Catégories
+- `GET /api/categories` - Obtenir toutes les catégories
 
-### Statistics
-- `GET /api/stats` - Get platform statistics
-- `GET /api/stats/ong/<id>` - Get ONG-specific statistics
+### Statistiques
+- `GET /api/stats` - Obtenir les statistiques de la plateforme
+- `GET /api/stats/ong/<id>` - Obtenir les statistiques spécifiques d'une ONG
 
-### Admin Operations
-- `GET /api/admin/pending-cases` - Get cases awaiting approval
-- `GET /api/admin/pending-ongs` - Get ONGs awaiting validation
-- `POST /api/admin/approve-case/<id>` - Approve a case
-- `POST /api/admin/reject-case/<id>` - Reject a case
-- `POST /api/admin/approve-ong/<id>` - Approve an ONG
-- `POST /api/admin/reject-ong/<id>` - Reject an ONG
+### Opérations Admin
+- `GET /api/admin/pending-cases` - Obtenir les cas en attente d'approbation
+- `GET /api/admin/pending-ongs` - Obtenir les ONG en attente de validation
+- `POST /api/admin/approve-case/<id>` - Approuver un cas
+- `POST /api/admin/reject-case/<id>` - Rejeter un cas
+- `POST /api/admin/approve-ong/<id>` - Approuver une ONG
+- `POST /api/admin/reject-ong/<id>` - Rejeter une ONG
 
-All API responses are in JSON format with proper UTF-8 encoding for multi-language support.
+Toutes les réponses API sont au format JSON avec encodage UTF-8 approprié pour le support multilingue.
 
-## 📸 Screenshots
+## 📸 Captures d'écran
 
-*Add screenshots of your application here to showcase the UI/UX*
+*Ajoutez des captures d'écran de votre application ici pour présenter l'UI/UX*
 
-## 🤝 Contributing
+## 🤝 Contribuer
 
-Contributions are welcome! Please follow these steps:
+Les contributions sont les bienvenues ! Veuillez suivre ces étapes :
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Fork le dépôt
+2. Créer une branche de fonctionnalité (`git checkout -b feature/NouvelleFonctionnalité`)
+3. Commit vos changements (`git commit -m 'Ajout d'une nouvelle fonctionnalité'`)
+4. Push vers la branche (`git push origin feature/NouvelleFonctionnalité`)
+5. Ouvrir une Pull Request
 
-### Development Guidelines
-- Follow PEP 8 for Python code
-- Use Flutter/Dart best practices
-- Write descriptive commit messages
-- Test your changes thoroughly
-- Update documentation as needed
+### Directives de Développement
+- Suivre PEP 8 pour le code Python
+- Utiliser les meilleures pratiques Flutter/Dart
+- Écrire des messages de commit descriptifs
+- Tester vos changements minutieusement
+- Mettre à jour la documentation au besoin
 
-## 📄 License
+## 📄 Licence
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
 
 ## 📞 Contact
 
-**Project Repository**: [https://github.com/sidimohamed31/Ong-Connect](https://github.com/sidimohamed31/Ong-Connect)
+**Dépôt du Projet** : [https://github.com/sidimohamed31/Ong-Connect](https://github.com/sidimohamed31/Ong-Connect)
 
-**Email**: ongconnecte@gmail.com
+**Email** : ongconnecte@gmail.com
 
-## 🙏 Acknowledgments
+## 🙏 Remerciements
 
-- Thanks to all NGOs using this platform to make a difference
-- Community contributors and testers
-- Open-source package maintainers
+- Merci à toutes les ONG utilisant cette plateforme pour faire une différence
+- Contributeurs de la communauté et testeurs
+- Mainteneurs de packages open-source
 
 ---
 
-**Made with ❤️ for a better world - Together for positive change**
+**Fait avec ❤️ pour un monde meilleur - Ensemble pour un changement positif**
