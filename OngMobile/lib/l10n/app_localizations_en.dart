@@ -396,4 +396,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get verificationDocument => 'Verification Document';
+
+  @override
+  String get adminSpace => 'Admin Space';
+
+  @override
+  String get adminLogin => 'Admin Login';
 }

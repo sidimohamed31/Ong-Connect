@@ -2,9 +2,7 @@ import 'package:flutter/foundation.dart';
 
 class ApiConstants {
   // IMPORTANT: Change this to your computer's local IP address when using a physical device
-  // Run 'ipconfig' (Windows) or 'ifconfig' (Mac/Linux) to find your IP
-  // Use 10.0.2.2 for Android emulator, or your actual IP for physical devices
-  static const String _physicalDeviceBaseUrl = 'http://192.168.2.8:3000/api';
+  static const String _physicalDeviceBaseUrl = 'http://10.9.165.203:3000/api';
   static const String _emulatorBaseUrl = 'http://10.0.2.2:3000/api';
   static const String _localBaseUrl = 'http://127.0.0.1:3000/api';
 

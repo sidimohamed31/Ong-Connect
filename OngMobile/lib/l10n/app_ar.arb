@@ -140,5 +140,7 @@
   "cancel": "إلغاء",
   "ong": "جمعية",
   "location": "الموقع",
-  "verificationDocument": "وثيقة التحقق"
+  "verificationDocument": "وثيقة التحقق",
+  "adminSpace": "فضاء المسؤول",
+  "adminLogin": "تسجيل دخول المسؤول"
 }

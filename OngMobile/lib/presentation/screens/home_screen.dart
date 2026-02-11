@@ -26,18 +26,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentPage = 0;
   final int _itemsPerPage = 9;
 
-  // Moved category definitions inside build or getter to access localizations
-  List<String> _getCategories(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
-    return [
-      loc.categoryAll,
-      loc.categoryHealth,
-      loc.categoryEducation,
-      loc.categoryFood,
-      loc.categoryHousing,
-    ];
-  }
-
   @override
   void initState() {
     super.initState();
@@ -305,7 +293,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   final cases = snapshot.data!;
 
                   // Pagination logic
-                  final totalPages = (cases.length / _itemsPerPage).ceil();
                   final startIndex = _currentPage * _itemsPerPage;
                   final endIndex = (startIndex + _itemsPerPage).clamp(
                     0,

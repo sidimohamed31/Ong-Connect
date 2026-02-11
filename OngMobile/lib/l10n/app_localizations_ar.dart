@@ -396,4 +396,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get verificationDocument => 'وثيقة التحقق';
+
+  @override
+  String get adminSpace => 'فضاء المسؤول';
+
+  @override
+  String get adminLogin => 'تسجيل دخول المسؤول';
 }

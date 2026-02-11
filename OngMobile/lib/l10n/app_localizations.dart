@@ -873,6 +873,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Verification Document'**
   String get verificationDocument;
+
+  /// No description provided for @adminSpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Space'**
+  String get adminSpace;
+
+  /// No description provided for @adminLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Login'**
+  String get adminLogin;
 }
 
 class _AppLocalizationsDelegate

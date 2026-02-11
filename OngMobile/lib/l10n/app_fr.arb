@@ -140,5 +140,7 @@
   "cancel": "Annuler",
   "ong": "ONG",
   "location": "Localisation",
-  "verificationDocument": "Document de vérification"
+  "verificationDocument": "Document de vérification",
+  "adminSpace": "Espace Administrateur",
+  "adminLogin": "Connexion Administrateur"
 }

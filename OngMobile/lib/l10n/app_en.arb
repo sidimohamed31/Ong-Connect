@@ -140,5 +140,7 @@
   "cancel": "Cancel",
   "ong": "ONG",
   "location": "Location",
-  "verificationDocument": "Verification Document"
+  "verificationDocument": "Verification Document",
+  "adminSpace": "Admin Space",
+  "adminLogin": "Admin Login"
 }

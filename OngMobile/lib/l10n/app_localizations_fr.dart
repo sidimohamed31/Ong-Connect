@@ -399,4 +399,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get verificationDocument => 'Document de vérification';
+
+  @override
+  String get adminSpace => 'Espace Administrateur';
+
+  @override
+  String get adminLogin => 'Connexion Administrateur';
 }

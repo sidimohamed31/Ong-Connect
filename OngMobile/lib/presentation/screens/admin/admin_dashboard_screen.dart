@@ -8,7 +8,8 @@ import 'ong_validation_screen.dart';
 import 'case_validation_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
-  const AdminDashboardScreen({super.key});
+  final VoidCallback? onLogout;
+  const AdminDashboardScreen({super.key, this.onLogout});
 
   @override
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
@@ -75,7 +76,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   Future<void> _logout() async {
     await _authService.logout();
     if (mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      if (widget.onLogout != null) {
+        widget.onLogout!();
+      } else {
+        // Fallback or default behavior
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      }
     }
   }
 

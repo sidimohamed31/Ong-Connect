@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">{{ t.dashboard }} Admin</h1>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">ONGs Validées</h6>
+                    <h2 class="display-6 fw-bold text-primary">{{ total_ongs }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Cas Sociaux Approuvés</h6>
+                    <h2 class="display-6 fw-bold text-success">{{ total_cases }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending ONGs -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">ONGs en attente de validation ({{ pending_ongs|length }})</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Date</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ong in pending_ongs %}
+                        <tr>
+                            <td>{{ ong.nom_ong }}</td>
+                            <td>{{ ong.email }}</td>
+                            <td>{{ ong.created_at }}</td>
+                            <td class="text-end">
+                                <a href="{{ url_for('detail_ong', id=ong.id_ong) }}"
+                                    class="btn btn-sm btn-outline-primary">Voir détails</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">
+                                Aucune ONG en attente
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Cases -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">Cas Sociaux en attente d'approbation ({{ pending_cases|length }})</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Titre</th>
+                            <th>ONG</th>
+                            <th>Date</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for case in pending_cases %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ case.titre }}</div>
+                                <small class="text-muted">{{ case.wilaya }}</small>
+                            </td>
+                            <td>{{ case.nom_ong }}</td>
+                            <td>{{ case.date_publication }}</td>
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <form action="{{ url_for('admin.approve_case', id=case.id_cas_social) }}"
+                                        method="POST">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-success"
+                                            onclick="return confirm('Confirmer l\'approbation ?')">Approuver</button>
+                                    </form>
+                                    <form action="{{ url_for('admin.reject_case', id=case.id_cas_social) }}"
+                                        method="POST">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Confirmer le rejet ?')">Rejeter</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">
+                                Aucun cas en attente
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
