@@ -885,6 +885,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Admin Login'**
   String get adminLogin;
+
+  /// No description provided for @date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
 }
 
 class _AppLocalizationsDelegate

@@ -114,42 +114,10 @@ class WecareCaseCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
 
-                      // Progress bar (showing case urgency/support)
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(
-                          CharifyTheme.radiusRound,
-                        ),
-                        child: LinearProgressIndicator(
-                          value: _getProgressValue(),
-                          backgroundColor: CharifyTheme.lightGrey,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            _getStatusColor(loc),
-                          ),
-                          minHeight: 5,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
                       // Stats row
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Support metric
-                          Flexible(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                '${(_getProgressValue() * 100).toInt()}% ${loc.processed}',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: _getStatusColor(loc),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
                           // Days indicator
                           if (socialCase.date != null)
                             Flexible(
@@ -265,32 +233,10 @@ class WecareCaseCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        CharifyTheme.radiusRound,
-                      ),
-                      child: LinearProgressIndicator(
-                        value: _getProgressValue(),
-                        backgroundColor: CharifyTheme.lightGrey,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          _getStatusColor(loc),
-                        ),
-                        minHeight: 4,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${(_getProgressValue() * 100).toInt()}% ${loc.processed}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: _getStatusColor(loc),
-                          ),
-                        ),
-                        if (socialCase.date != null)
+                    if (socialCase.date != null)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
                           Text(
                             _getDaysAgo(loc),
                             style: const TextStyle(
@@ -298,8 +244,8 @@ class WecareCaseCard extends StatelessWidget {
                               color: CharifyTheme.mediumGrey,
                             ),
                           ),
-                      ],
-                    ),
+                        ],
+                      ),
                   ],
                 ),
               ),
@@ -380,26 +326,6 @@ class WecareCaseCard extends StatelessWidget {
         if (lowCat.contains('eau') || lowCat.contains('water'))
           return const Color(0xFF4A90E2);
         return CharifyTheme.primaryGreen;
-    }
-  }
-
-  Color _getStatusColor(AppLocalizations loc) {
-    if (socialCase.status == 'Urgent') {
-      return CharifyTheme.dangerRed;
-    } else if (socialCase.status == 'Résolu') {
-      return CharifyTheme.successGreen;
-    } else {
-      return CharifyTheme.warningYellow;
-    }
-  }
-
-  double _getProgressValue() {
-    if (socialCase.status == 'Résolu') {
-      return 1.0;
-    } else if (socialCase.status == 'Urgent') {
-      return 0.3;
-    } else {
-      return 0.65; // En cours
     }
   }
 

@@ -23,9 +23,9 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-4">
-                            <label for="wilaya" class="form-label">Wilaya</label>
+                            <label for="wilaya" class="form-label">{{ t.wilaya }}</label>
                             <select class="form-select" id="wilaya" name="wilaya" required>
-                                <option value="">-- Select Wilaya --</option>
+                                <option value="">{{ t.select_wilaya }}</option>
                                 {% for w in locations.keys()|sort %}
                                 <option value="{{ w }}" {{ 'selected' if case and case.wilaya==w else '' }}>{{ w }}
                                 </option>
@@ -33,10 +33,10 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-4">
-                            <label for="moughataa" class="form-label">Moughataa</label>
+                            <label for="moughataa" class="form-label">{{ t.moughataa }}</label>
                             <select class="form-select" id="moughataa" name="moughataa" required {% if not case or not
                                 case.wilaya %}disabled{% endif %}>
-                                <option value="">-- Select Moughataa --</option>
+                                <option value="">{{ t.select_moughataa }}</option>
                             </select>
                         </div>
                     </div>
@@ -45,16 +45,18 @@
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="bi bi-geo-alt"></i></span>
                             <input type="text" class="form-control" id="adresse" name="adresse"
-                                value="{{ case.adresse if case else '' }}" placeholder="Specific location details...">
+                                value="{{ case.adresse if case else '' }}"
+                                placeholder="{{ t.specific_location_details }}">
                         </div>
                     </div>
-                    
+
                     <div class="mb-4">
-                        <label for="category_id" class="form-label">Catégorie</label>
+                        <label for="category_id" class="form-label">{{ t.categories }}</label>
                         <select class="form-select" id="category_id" name="category_id" required>
-                            <option value="">-- Sélectionner une catégorie --</option>
+                            <option value="">{{ t.select_category }}</option>
                             {% for cat in categories %}
-                            <option value="{{ cat.idCategorie }}" {{ 'selected' if case and case.category_id==cat.idCategorie else '' }}>{{ cat.nomCategorie }}</option>
+                            <option value="{{ cat.idCategorie }}" {{ 'selected' if case and
+                                case.category_id==cat.idCategorie else '' }}>{{ cat.nomCategorie }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -92,12 +94,12 @@
                         <label for="media" class="form-label">{{ t.media }}</label>
                         <input type="file" class="form-control" id="media" name="media" multiple
                             accept="image/*,video/*">
-                        <div class="form-text">Allowed formats: Images, Videos.</div>
+                        <div class="form-text">{{ t.allowed_formats }}</div>
                     </div>
 
                     {% if action == 'edit' and media_list %}
                     <div class="mb-4">
-                        <label class="form-label fw-bold">Attached Media</label>
+                        <label class="form-label fw-bold">{{ t.attached_media }}</label>
                         <div class="row g-3">
                             {% for media in media_list %}
                             <div class="col-6 col-md-3">
@@ -114,7 +116,7 @@
                                     <div class="card-footer p-2 text-center bg-white border-top-0">
                                         <div class="d-flex gap-2 justify-content-center">
                                             <a href="{{ url_for('static', filename=media.file_url) }}" target="_blank"
-                                                class="btn btn-sm btn-outline-primary flex-grow-1">View</a>
+                                                class="btn btn-sm btn-outline-primary flex-grow-1">{{ t.view }}</a>
                                             <a href="{{ url_for('delete_media', id=media.id_media) }}"
                                                 class="btn btn-sm btn-outline-danger"
                                                 onclick="return confirm('{{ t.confirm_delete }}')">
@@ -175,6 +177,13 @@
         // Initial check
         if (wilayaSelect.value) {
             updateMoughataas(true);
+        }
+
+        // Pre-fill date with today if empty (for new cases)
+        const dateInput = document.getElementById('date_publication');
+        if (dateInput && !dateInput.value) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
         }
     });
 </script>

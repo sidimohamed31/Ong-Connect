@@ -5,7 +5,9 @@ import '../widgets/wecare_case_card.dart';
 import '../widgets/charify_widgets.dart';
 import 'browse_screen.dart';
 import 'case_details_screen.dart';
+import 'notifications_screen.dart';
 import '../../core/theme/charify_theme.dart';
+import '../../data/models/notification_model.dart';
 
 import 'package:ong_mobile_app/l10n/app_localizations.dart';
 
@@ -21,7 +23,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ApiService _apiService = ApiService();
-  late Future<List<CaseModel>> _casesFuture;
+  Future<List<CaseModel>>? _casesFuture;
+  Future<List<NotificationModel>>? _notificationsFuture;
   String? _selectedCategory;
   int _currentPage = 0;
   final int _itemsPerPage = 9;
@@ -31,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Default load all cases
     _loadCases();
+    _notificationsFuture = _apiService.getNotifications();
   }
 
   void _loadCases() {
@@ -77,6 +81,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _refresh() async {
     _loadCases();
+    setState(() {
+      _notificationsFuture = _apiService.getNotifications();
+    });
   }
 
   @override
@@ -136,37 +143,50 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: CharifyTheme.darkGrey,
                       ),
                       // Notification icon
-                      Stack(
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    loc.noNotifications,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  backgroundColor: CharifyTheme.darkGrey,
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.notifications_outlined),
-                            color: CharifyTheme.darkGrey,
-                          ),
-                          Positioned(
-                            right: 12,
-                            top: 12,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: CharifyTheme.dangerRed,
-                                shape: BoxShape.circle,
+                      FutureBuilder<List<NotificationModel>>(
+                        future: _notificationsFuture,
+                        builder: (context, snapshot) {
+                          final hasUnread =
+                              snapshot.hasData &&
+                              snapshot.data!.any((n) => !n.isRead);
+
+                          return Stack(
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const NotificationsScreen(),
+                                    ),
+                                  ).then((_) {
+                                    // Refresh notifications when coming back
+                                    setState(() {
+                                      _notificationsFuture = _apiService
+                                          .getNotifications();
+                                    });
+                                  });
+                                },
+                                icon: const Icon(Icons.notifications_outlined),
+                                color: CharifyTheme.darkGrey,
                               ),
-                            ),
-                          ),
-                        ],
+                              if (hasUnread)
+                                Positioned(
+                                  right: 12,
+                                  top: 12,
+                                  child: Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: const BoxDecoration(
+                                      color: CharifyTheme.dangerRed,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -255,7 +275,8 @@ class _HomeScreenState extends State<HomeScreen> {
               FutureBuilder<List<CaseModel>>(
                 future: _casesFuture,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+                  if (snapshot.connectionState == ConnectionState.waiting &&
+                      (_casesFuture != null)) {
                     return const SliverToBoxAdapter(
                       child: Center(
                         child: Padding(
@@ -529,22 +550,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        CharifyTheme.radiusRound,
-                      ),
-                      child: LinearProgressIndicator(
-                        value: 0.3,
-                        backgroundColor: CharifyTheme.white.withValues(
-                          alpha: 0.3,
-                        ),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          CharifyTheme.dangerRed,
-                        ),
-                        minHeight: 6,
-                      ),
-                    ),
                   ],
                 ),
               ),

@@ -402,4 +402,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminLogin => 'Admin Login';
+
+  @override
+  String get date => 'Date';
 }

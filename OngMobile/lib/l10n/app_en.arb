@@ -142,5 +142,6 @@
   "location": "Location",
   "verificationDocument": "Verification Document",
   "adminSpace": "Admin Space",
-  "adminLogin": "Admin Login"
+  "adminLogin": "Admin Login",
+  "date": "Date"
 }

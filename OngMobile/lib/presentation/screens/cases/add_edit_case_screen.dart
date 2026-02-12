@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../data/models/case_model.dart';
@@ -19,6 +20,7 @@ class _AddEditCaseScreenState extends State<AddEditCaseScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _addressController = TextEditingController();
+  final _dateController = TextEditingController();
 
   String? _selectedCategory;
   String? _selectedWilaya;
@@ -51,6 +53,10 @@ class _AddEditCaseScreenState extends State<AddEditCaseScreen> {
       _selectedWilaya = c.location.wilaya;
       _selectedMoughataa = c.location.moughataa;
       _selectedStatus = c.status;
+      _dateController.text =
+          c.date ?? DateTime.now().toIso8601String().split('T')[0];
+    } else {
+      _dateController.text = DateTime.now().toIso8601String().split('T')[0];
     }
   }
 
@@ -108,21 +114,20 @@ class _AddEditCaseScreenState extends State<AddEditCaseScreen> {
       'wilaya': _selectedWilaya!,
       'moughataa': _selectedMoughataa ?? '',
       'statut': _selectedStatus ?? 'En cours',
+      'date_publication': _dateController.text,
       'latitude': '0.0',
       'longitude': '0.0',
     };
-
-    final imagePaths = _selectedImages.map((e) => e.path).toList();
 
     bool success;
     if (widget.caseModel != null) {
       success = await ApiService().updateCase(
         widget.caseModel!.id,
         fields,
-        imagePaths,
+        _selectedImages,
       );
     } else {
-      success = await ApiService().addCase(fields, imagePaths);
+      success = await ApiService().addCase(fields, _selectedImages);
     }
 
     if (mounted) {
@@ -263,6 +268,34 @@ class _AddEditCaseScreenState extends State<AddEditCaseScreen> {
                 }).toList(),
                 onChanged: (v) => setState(() => _selectedStatus = v),
               ),
+              const SizedBox(height: 16),
+
+              // Date Publication
+              TextFormField(
+                controller: _dateController,
+                decoration: InputDecoration(
+                  labelText: loc.date,
+                  border: const OutlineInputBorder(),
+                  suffixIcon: const Icon(Icons.calendar_today),
+                ),
+                readOnly:
+                    true, // Make it pre-filled and read-only as requested "Auto-Incremented"
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      _dateController.text = pickedDate.toIso8601String().split(
+                        'T',
+                      )[0];
+                    });
+                  }
+                },
+              ),
               const SizedBox(height: 24),
 
               // Images
@@ -279,7 +312,19 @@ class _AddEditCaseScreenState extends State<AddEditCaseScreen> {
                     itemCount: _selectedImages.length,
                     itemBuilder: (ctx, i) => Padding(
                       padding: const EdgeInsets.all(4.0),
-                      child: Image.file(File(_selectedImages[i].path)),
+                      child: kIsWeb
+                          ? Image.network(
+                              _selectedImages[i].path,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.file(
+                              File(_selectedImages[i].path),
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
                 ),

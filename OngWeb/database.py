@@ -188,6 +188,19 @@ def init_db():
                 )
             """)
 
+            # Notifications
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS notifications (
+                    id_notification INT AUTO_INCREMENT PRIMARY KEY,
+                    id_cas_social INT,
+                    message_fr VARCHAR(255) NOT NULL,
+                    message_ar VARCHAR(255) NOT NULL,
+                    date_notification DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    is_read BOOLEAN DEFAULT FALSE,
+                    FOREIGN KEY (id_cas_social) REFERENCES cas_social(id_cas_social) ON DELETE CASCADE
+                )
+            """)
+
             # --- Fix/Enforce UTF8MB4 for Arabic Support ---
             cursor.execute(f"ALTER DATABASE {DB_NAME} CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci")
             

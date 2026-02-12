@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import secrets
+import random
 import smtplib
 from email.mime.text import MIMEText
 from flask_cors import CORS
@@ -248,12 +249,25 @@ def init_db():
                 )
             """)
 
+            # Notifications
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS notifications (
+                    id_notification INT AUTO_INCREMENT PRIMARY KEY,
+                    id_cas_social INT,
+                    message_fr VARCHAR(255) NOT NULL,
+                    message_ar VARCHAR(255) NOT NULL,
+                    date_notification DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    is_read BOOLEAN DEFAULT FALSE,
+                    FOREIGN KEY (id_cas_social) REFERENCES cas_social(id_cas_social) ON DELETE CASCADE
+                )
+            """)
+
             # --- Fix/Enforce UTF8MB4 for Arabic Support ---
             # Ensure the database itself uses utf8mb4
             cursor.execute(f"ALTER DATABASE {DB_NAME} CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci")
             
             # Convert all specific tables to utf8mb4 to fix "Incorrect string value" errors
-            tables_to_fix = ['users', 'administrateur', 'ong', 'cas_social', 'beneficier', 'categorie', 'media']
+            tables_to_fix = ['users', 'administrateur', 'ong', 'cas_social', 'beneficier', 'categorie', 'media', 'notifications']
             for table in tables_to_fix:
                 try:
                     cursor.execute(f"ALTER TABLE {table} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
@@ -598,6 +612,13 @@ TRANSLATIONS = {
         'passwords_do_not_match': 'كلمات المرور غير متطابقة',
         'wilaya': 'الولاية',
         'moughataa': 'المقاطعة',
+        'select_wilaya': '-- اختر ولاية --',
+        'select_moughataa': '-- اختر مقاطعة --',
+        'specific_location_details': 'تفاصيل الموقع المحددة...',
+        'select_category': '-- اختر فئة --',
+        'allowed_formats': 'الصيغ المسموح بها: صور، فيديوهات.',
+        'attached_media': 'الوسائط المرفقة',
+        'view': 'عرض',
         'call_ong': 'اتصل بالمنظمة',
         'email': 'البريد الإلكتروني',
     },
@@ -750,6 +771,13 @@ TRANSLATIONS = {
         'passwords_do_not_match': 'Les mots de passe ne correspondent pas',
         'wilaya': 'Wilaya',
         'moughataa': 'Moughataa',
+        'select_wilaya': '-- Sélectionner une Wilaya --',
+        'select_moughataa': '-- Sélectionner une Moughataa --',
+        'specific_location_details': 'Détails de l\'emplacement spécifique...',
+        'select_category': '-- Sélectionner une catégorie --',
+        'allowed_formats': 'Formats autorisés : Images, Vidéos.',
+        'attached_media': 'Médias attachés',
+        'view': 'Voir',
         'call_ong': 'Appeler ONG',
         'email': 'Email',
     }
@@ -1175,8 +1203,8 @@ def forgot_password():
                 user = cursor.fetchone()
                 
                 if user:
-                     # Generate random password
-                    new_password = secrets.token_urlsafe(8)
+                     # Generate random password (8-digit number)
+                    new_password = ''.join([str(random.randint(0, 9)) for _ in range(8)])
                     hashed_password = generate_password_hash(new_password)
                     
                     # 2. Update unified users table
@@ -1573,6 +1601,17 @@ def approve_case(id):
     with get_db() as conn:
         with conn.cursor() as cursor:
             cursor.execute("UPDATE cas_social SET statut_approbation = 'approuvé' WHERE id_cas_social = %s", (id,))
+            
+            # Trigger Notification
+            cursor.execute("SELECT titre FROM cas_social WHERE id_cas_social = %s", (id,))
+            case = cursor.fetchone()
+            if case:
+                case_title = case['titre']
+                cursor.execute("""
+                    INSERT INTO notifications (id_cas_social, message_fr, message_ar)
+                    VALUES (%s, %s, %s)
+                """, (id, f"Nouveau cas social publié : {case_title}", f"تم نشر حالة اجتماعية جديدة: {case_title}"))
+                
         conn.commit()
     flash(TRANSLATIONS[session.get('lang', 'ar')]['case_approved'], 'success')
     return redirect(url_for('admin_dashboard'))
@@ -1754,6 +1793,17 @@ def api_admin_approve_case(admin_user_id, id):
         with get_db() as conn:
             with conn.cursor() as cursor:
                 cursor.execute("UPDATE cas_social SET statut_approbation = 'approuvé' WHERE id_cas_social = %s", (id,))
+                
+                # Trigger Notification
+                cursor.execute("SELECT titre FROM cas_social WHERE id_cas_social = %s", (id,))
+                case = cursor.fetchone()
+                if case:
+                    case_title = case['titre']
+                    cursor.execute("""
+                        INSERT INTO notifications (id_cas_social, message_fr, message_ar)
+                        VALUES (%s, %s, %s)
+                    """, (id, f"Nouveau cas social publié : {case_title}", f"تم نشر حالة اجتماعية جديدة: {case_title}"))
+                    
             conn.commit()
         return jsonify({'success': True, 'message': 'Case approved successfully'})
     except Exception as e:
@@ -2363,8 +2413,8 @@ def send_reset_email(to_email, new_password):
 def admin_reset_password(id):
     # Check handled by decorator
         
-    # Generate random password
-    new_password = secrets.token_urlsafe(8)
+    # Generate random password (8-digit number)
+    new_password = ''.join([str(random.randint(0, 9)) for _ in range(8)])
     hashed_password = generate_password_hash(new_password)
     
     with get_db() as conn:
@@ -2531,13 +2581,18 @@ def add_case():
                         INSERT INTO cas_social (titre, description, adresse, wilaya, moughataa, date_publication, statut, id_ong, category_id)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """
+                    # Handle date_publication: if missing or empty, use today
+                    date_pub = request.form.get('date_publication')
+                    if not date_pub:
+                        date_pub = datetime.now().strftime('%Y-%m-%d')
+
                     cursor.execute(sql, (
                         request.form['titre'],
                         request.form['description'],
                         request.form['adresse'],
                         request.form['wilaya'],
                         request.form['moughataa'],
-                        request.form['date_publication'],
+                        date_pub,
                         request.form['statut'],
                         id_ong,
                         request.form['category_id']
@@ -3723,15 +3778,6 @@ def api_get_case_detail(id):
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/cases/<int:id>', methods=['DELETE'])
-@admin_token_required
-def api_admin_delete_case_mobile(admin_user_id, id):
-    # This was named api_delete_case in plan but we have admin token required decorator
-    # Wait, the plan said "Verify the case belongs to the authenticated ONG".
-    # This should be for ONG, not Admin. Admin can already reject.
-    # So I need @token_required (which is for ONG)
-    return jsonify({'message': 'Endpoint logic below'}), 500
-
-@app.route('/api/cases/<int:id>', methods=['DELETE'])
 @token_required
 def api_delete_case(ong_id, id):
     try:
@@ -3750,7 +3796,9 @@ def api_delete_case(ong_id, id):
                 for media in media_files:
                     try:
                         if media['file_url']:
-                            file_path = os.path.join(app.config['UPLOAD_FOLDER'], media['file_url'])
+                            # file_url is "uploads/media/filename.jpg", stored in static/uploads/media
+                            # joining 'static' with 'uploads/media/filename.jpg'
+                            file_path = os.path.join('static', media['file_url'])
                             if os.path.exists(file_path):
                                 os.remove(file_path)
                     except Exception as e:
@@ -3829,6 +3877,144 @@ def api_get_statistics():
         return Response(json_response, content_type='application/json; charset=utf-8')
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+
+@app.route('/api/notifications', methods=['GET'])
+def api_get_notifications():
+    """Fetch all notifications for mobile app"""
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT n.*, c.titre, c.description,
+                           (SELECT file_url FROM media WHERE id_cas_social = n.id_cas_social LIMIT 1) as image
+                    FROM notifications n
+                    LEFT JOIN cas_social c ON n.id_cas_social = c.id_cas_social
+                    ORDER BY n.date_notification DESC
+                    LIMIT 50
+                """)
+                notifications = cursor.fetchall()
+                
+                for n in notifications:
+                    if n.get('date_notification'):
+                        n['date_notification'] = n['date_notification'].isoformat()
+                    if n.get('image'):
+                        n['image'] = f"{request.host_url.rstrip('/')}/static/{n['image']}"
+                
+                return jsonify({'success': True, 'data': notifications})
+    except Exception as e:
+        print(f"Error fetching notifications: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/cases/add', methods=['POST'])
+@token_required
+def api_add_case(ong_id):
+    """Add new social case from mobile app (multipart/form-data)"""
+    try:
+        # Get data from form (multipart)
+        titre = request.form.get('titre')
+        description = request.form.get('description')
+        adresse = request.form.get('adresse', '')
+        wilaya = request.form.get('wilaya', '')
+        moughataa = request.form.get('moughataa', '')
+        statut = request.form.get('statut', 'En cours')
+        latitude = request.form.get('latitude')
+        longitude = request.form.get('longitude')
+        category_id = request.form.get('category_id')
+
+        if not titre or not description or not category_id:
+            return jsonify({'success': False, 'error': 'Title, description and category required'}), 400
+
+        date_pub = request.form.get('date_publication')
+        if not date_pub:
+            date_pub = datetime.now().strftime('%Y-%m-%d')
+
+        with get_db() as conn:
+            with conn.cursor() as cursor:
+                # 1. Insert Case
+                sql = """
+                    INSERT INTO cas_social (titre, description, adresse, wilaya, moughataa, 
+                                            date_publication, statut, id_ong, category_id, 
+                                            statut_approbation, latitude, longitude)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'en_attente', %s, %s)
+                """
+                cursor.execute(sql, (titre, description, adresse, wilaya, moughataa, 
+                                     date_pub, statut, ong_id, category_id, latitude, longitude))
+                case_id = cursor.lastrowid
+
+                # 2. Handle Media Uploads
+                if 'media' in request.files:
+                    files = request.files.getlist('media')
+                    for file in files:
+                        if file and file.filename != '':
+                            filename = secure_filename(file.filename)
+                            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                            unique_filename = f"{timestamp}_{filename}"
+                            file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                            file.save(file_path)
+
+                            # Save to media table - relative path for web
+                            web_path = f"uploads/media/{unique_filename}"
+                            cursor.execute("INSERT INTO media (id_cas_social, file_url) VALUES (%s, %s)", (case_id, web_path))
+                
+                conn.commit()
+                
+                return jsonify({
+                    'success': True,
+                    'case_id': case_id,
+                    'message': 'Case created and awaiting approval'
+                })
+    except Exception as e:
+        print(f"Error adding mobile case: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/cases/edit/<int:id>', methods=['POST'])
+@token_required
+def api_edit_case(current_ong_id, id):
+    """Edit social case from mobile app (multipart/form-data)"""
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cursor:
+                # Verify ownership
+                cursor.execute("SELECT id_ong FROM cas_social WHERE id_cas_social = %s", (id,))
+                case = cursor.fetchone()
+                if not case or case['id_ong'] != current_ong_id:
+                    return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+                # Update main fields
+                data_fields = ['titre', 'description', 'adresse', 'wilaya', 'moughataa', 'statut', 'latitude', 'longitude', 'category_id']
+                updates = []
+                params = []
+                
+                for field in data_fields:
+                    if field in request.form:
+                        updates.append(f"{field} = %s")
+                        params.append(request.form[field])
+                
+                if updates:
+                    params.append(id)
+                    cursor.execute(f"UPDATE cas_social SET {', '.join(updates)} WHERE id_cas_social = %s", params)
+
+                # Handle Media
+                if 'media' in request.files:
+                    files = request.files.getlist('media')
+                    for file in files:
+                        if file and file.filename != '':
+                            filename = secure_filename(file.filename)
+                            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                            unique_filename = f"{timestamp}_{filename}"
+                            file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                            file.save(file_path)
+
+                            web_path = f"uploads/media/{unique_filename}"
+                            cursor.execute("INSERT INTO media (id_cas_social, file_url) VALUES (%s, %s)", (id, web_path))
+
+                conn.commit()
+                return jsonify({'success': True, 'message': 'Case updated successfully'})
+    except Exception as e:
+        print(f"Error editing mobile case: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 if __name__ == '__main__':

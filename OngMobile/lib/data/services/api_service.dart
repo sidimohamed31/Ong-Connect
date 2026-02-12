@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import '../../core/constants/api_constants.dart';
 import '../models/case_model.dart';
+import '../models/notification_model.dart';
 import 'auth_service.dart';
 
 class ApiService {
@@ -86,12 +89,6 @@ class ApiService {
       final response = await client.get(
         Uri.parse(ApiConstants.categoriesEndpoint),
       );
-      // Backend might return different structure for categories
-      // app.py: return jsonify({'success': True, 'categories': categories}) which is list of tuples usually?
-      // Checking app.py list_categories (HTML) vs API...
-      // Wait, app.py didn't show an API endpoint for categories in the snippets I saw!
-      // ApiConstants says: static String get categoriesEndpoint => '$baseUrl/categories';
-      // I need to be careful here. Use safe parsing.
 
       if (response.statusCode == 200) {
         try {
@@ -142,8 +139,8 @@ class ApiService {
 
   Future<bool> registerOng(
     Map<String, String> fields, {
-    String? logoPath,
-    String? docPath,
+    XFile? logo,
+    XFile? doc,
   }) async {
     try {
       final uri = Uri.parse(ApiConstants.registerOngEndpoint);
@@ -153,14 +150,36 @@ class ApiService {
         request.fields[key] = value;
       });
 
-      if (logoPath != null) {
-        request.files.add(await http.MultipartFile.fromPath('logo', logoPath));
+      if (logo != null) {
+        if (kIsWeb) {
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'logo',
+              await logo.readAsBytes(),
+              filename: logo.name,
+            ),
+          );
+        } else {
+          request.files.add(
+            await http.MultipartFile.fromPath('logo', logo.path),
+          );
+        }
       }
 
-      if (docPath != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('verification_doc', docPath),
-        );
+      if (doc != null) {
+        if (kIsWeb) {
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'verification_doc',
+              await doc.readAsBytes(),
+              filename: doc.name,
+            ),
+          );
+        } else {
+          request.files.add(
+            await http.MultipartFile.fromPath('verification_doc', doc.path),
+          );
+        }
       }
 
       final streamedResponse = await request.send();
@@ -174,10 +193,7 @@ class ApiService {
     }
   }
 
-  Future<bool> addCase(
-    Map<String, String> fields,
-    List<String> imagePaths,
-  ) async {
+  Future<bool> addCase(Map<String, String> fields, List<XFile> images) async {
     try {
       final uri = Uri.parse(ApiConstants.addCaseEndpoint);
       var request = http.MultipartRequest('POST', uri);
@@ -190,8 +206,20 @@ class ApiService {
         request.fields[key] = value;
       });
 
-      for (var path in imagePaths) {
-        request.files.add(await http.MultipartFile.fromPath('media', path));
+      for (var image in images) {
+        if (kIsWeb) {
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'media',
+              await image.readAsBytes(),
+              filename: image.name,
+            ),
+          );
+        } else {
+          request.files.add(
+            await http.MultipartFile.fromPath('media', image.path),
+          );
+        }
       }
 
       final streamedResponse = await request.send();
@@ -208,7 +236,7 @@ class ApiService {
   Future<bool> updateCase(
     int id,
     Map<String, String> fields,
-    List<String> imagePaths,
+    List<XFile> images,
   ) async {
     try {
       final uri = Uri.parse(ApiConstants.updateCaseDetailsEndpoint(id));
@@ -225,8 +253,20 @@ class ApiService {
         request.fields[key] = value;
       });
 
-      for (var path in imagePaths) {
-        request.files.add(await http.MultipartFile.fromPath('media', path));
+      for (var image in images) {
+        if (kIsWeb) {
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'media',
+              await image.readAsBytes(),
+              filename: image.name,
+            ),
+          );
+        } else {
+          request.files.add(
+            await http.MultipartFile.fromPath('media', image.path),
+          );
+        }
       }
 
       final streamedResponse = await request.send();
@@ -350,6 +390,25 @@ class ApiService {
     } catch (e) {
       log('Error rejecting case: $e');
       return false;
+    }
+  }
+
+  Future<List<NotificationModel>> getNotifications() async {
+    try {
+      final response = await client.get(
+        Uri.parse(ApiConstants.notificationsEndpoint),
+      );
+      final data = _processResponse(response);
+
+      if (data != null && data['success'] == true) {
+        return (data['data'] as List)
+            .map((e) => NotificationModel.fromJson(e))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      log('Error fetching notifications: $e');
+      return [];
     }
   }
 }

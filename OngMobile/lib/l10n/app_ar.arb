@@ -142,5 +142,6 @@
   "location": "الموقع",
   "verificationDocument": "وثيقة التحقق",
   "adminSpace": "فضاء المسؤول",
-  "adminLogin": "تسجيل دخول المسؤول"
+  "adminLogin": "تسجيل دخول المسؤول",
+  "date": "التاريخ"
 }

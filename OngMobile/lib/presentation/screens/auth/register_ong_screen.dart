@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -23,8 +24,8 @@ class _RegisterOngScreenState extends State<RegisterOngScreen> {
   String _adresse = '';
   String _password = '';
   List<String> _selectedDomains = [];
-  File? _logoFile;
-  File? _docFile;
+  XFile? _logoFile;
+  XFile? _docFile;
 
   // Data
   List<dynamic> _categories = [];
@@ -56,9 +57,9 @@ class _RegisterOngScreenState extends State<RegisterOngScreen> {
     if (picked != null) {
       setState(() {
         if (isLogo) {
-          _logoFile = File(picked.path);
+          _logoFile = picked;
         } else {
-          _docFile = File(picked.path);
+          _docFile = picked;
         }
       });
     }
@@ -140,8 +141,8 @@ class _RegisterOngScreenState extends State<RegisterOngScreen> {
           'mot_de_passe': _password,
           'domaine_intervation': _selectedDomains.join(','),
         },
-        logoPath: _logoFile!.path,
-        docPath: _docFile!.path,
+        logo: _logoFile,
+        doc: _docFile,
       );
 
       if (success && mounted) {
@@ -271,7 +272,15 @@ class _RegisterOngScreenState extends State<RegisterOngScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: _logoFile != null
-                            ? Image.file(_logoFile!, fit: BoxFit.contain)
+                            ? (kIsWeb
+                                  ? Image.network(
+                                      _logoFile!.path,
+                                      fit: BoxFit.contain,
+                                    )
+                                  : Image.file(
+                                      File(_logoFile!.path),
+                                      fit: BoxFit.contain,
+                                    ))
                             : Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -317,7 +326,7 @@ class _RegisterOngScreenState extends State<RegisterOngScreen> {
                             Expanded(
                               child: Text(
                                 _docFile != null
-                                    ? _docFile!.path.split('/').last
+                                    ? _docFile!.name
                                     : loc.selectImages,
                                 overflow: TextOverflow.ellipsis,
                               ),

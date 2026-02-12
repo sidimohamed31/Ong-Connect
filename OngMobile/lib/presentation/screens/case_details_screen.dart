@@ -179,86 +179,6 @@ class CaseDetailsScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 16),
 
-                            // Progress Card (Wecare-style)
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: CharifyTheme.white,
-                                borderRadius: BorderRadius.circular(
-                                  CharifyTheme.radiusMedium,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        loc.caseStatus,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      Text(
-                                        '${(_getProgressValue(socialCase.status) * 100).toInt()}%',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: _getStatusColor(
-                                            socialCase.status,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                      CharifyTheme.radiusRound,
-                                    ),
-                                    child: LinearProgressIndicator(
-                                      value: _getProgressValue(
-                                        socialCase.status,
-                                      ),
-                                      backgroundColor: CharifyTheme.lightGrey,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        _getStatusColor(socialCase.status),
-                                      ),
-                                      minHeight: 8,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.calendar_today_outlined,
-                                        size: 14,
-                                        color: CharifyTheme.mediumGrey,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '${loc.publishedOn} ${socialCase.date ?? loc.unavailable}',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: CharifyTheme.mediumGrey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
                             const SizedBox(height: 24),
 
                             // Description Section
@@ -610,26 +530,6 @@ class CaseDetailsScreen extends StatelessWidget {
         if (lowCat.contains('eau') || lowCat.contains('water'))
           return const Color(0xFF4A90E2);
         return CharifyTheme.primaryGreen;
-    }
-  }
-
-  Color _getStatusColor(String? status) {
-    if (status == 'Urgent') {
-      return CharifyTheme.dangerRed;
-    } else if (status == 'Résolu') {
-      return CharifyTheme.successGreen;
-    } else {
-      return CharifyTheme.warningYellow;
-    }
-  }
-
-  double _getProgressValue(String? status) {
-    if (status == 'Résolu') {
-      return 1.0;
-    } else if (status == 'Urgent') {
-      return 0.3;
-    } else {
-      return 0.65;
     }
   }
 

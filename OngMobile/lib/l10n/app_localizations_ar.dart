@@ -402,4 +402,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminLogin => 'تسجيل دخول المسؤول';
+
+  @override
+  String get date => 'التاريخ';
 }

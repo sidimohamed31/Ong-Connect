@@ -63,4 +63,6 @@ class ApiConstants {
       '$baseUrl/admin/case/$id/approve';
   static String adminRejectCaseEndpoint(int id) =>
       '$baseUrl/admin/case/$id/reject';
+
+  static String get notificationsEndpoint => '$baseUrl/notifications';
 }

@@ -230,6 +230,17 @@ def admin_approve_case(id):
         with get_db() as conn:
             with conn.cursor() as cursor:
                 cursor.execute("UPDATE cas_social SET statut_approbation = 'approuvé' WHERE id_cas_social = %s", (id,))
+                
+                # Trigger Notification
+                cursor.execute("SELECT titre FROM cas_social WHERE id_cas_social = %s", (id,))
+                case = cursor.fetchone()
+                if case:
+                    case_title = case['titre']
+                    cursor.execute("""
+                        INSERT INTO notifications (id_cas_social, message_fr, message_ar)
+                        VALUES (%s, %s, %s)
+                    """, (id, f"Nouveau cas social publié : {case_title}", f"تم نشر حالة اجتماعية جديدة: {case_title}"))
+                    
             conn.commit()
         return jsonify({'success': True, 'message': 'Case approved successfully'})
     except Exception as e:
