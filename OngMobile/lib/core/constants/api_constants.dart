@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 
 class ApiConstants {
-  // IMPORTANT: Change this to your computer's local IP address when using a physical device
-  static const String _physicalDeviceBaseUrl = 'http://10.9.165.203:3000/api';
+  // Using ADB reverse port forwarding: adb reverse tcp:3000 tcp:3000
+  // This routes localhost:3000 on the phone to localhost:3000 on your computer via USB
+  static const String _physicalDeviceBaseUrl = 'http://127.0.0.1:3000/api';
   static const String _emulatorBaseUrl = 'http://10.0.2.2:3000/api';
   static const String _localBaseUrl = 'http://127.0.0.1:3000/api';
 

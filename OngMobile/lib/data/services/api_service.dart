@@ -272,13 +272,50 @@ class ApiService {
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
-      // Update usually returns 200 OK
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return true;
-      }
-      return false;
+      final data = _processResponse(response);
+      return data != null && data['success'] == true;
     } catch (e) {
       log('Error updating case: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateOngProfile(Map<String, String> fields, XFile? logo) async {
+    try {
+      final uri = Uri.parse('${ApiConstants.rootUrl}/api/ong/profile/update');
+      var request = http.MultipartRequest('POST', uri);
+
+      if (AuthService().token != null) {
+        request.headers['Authorization'] = 'Bearer ${AuthService().token}';
+      }
+
+      fields.forEach((key, value) {
+        request.fields[key] = value;
+      });
+
+      if (logo != null) {
+        if (kIsWeb) {
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'logo',
+              await logo.readAsBytes(),
+              filename: logo.name,
+            ),
+          );
+        } else {
+          request.files.add(
+            await http.MultipartFile.fromPath('logo', logo.path),
+          );
+        }
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      final data = _processResponse(response);
+      return data != null && data['success'] == true;
+    } catch (e) {
+      log('Error updating profile: $e');
       return false;
     }
   }

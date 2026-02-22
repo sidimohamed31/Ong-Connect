@@ -220,7 +220,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 TextButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const BrowseScreen(),
+                                      ),
+                                    );
+                                  },
                                   child: Text(loc.seeAll),
                                 ),
                               ],

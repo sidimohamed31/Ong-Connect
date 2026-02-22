@@ -131,7 +131,7 @@ class CaseDetailsScreen extends StatelessWidget {
                         color: CharifyTheme.backgroundGrey,
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -534,8 +534,9 @@ class CaseDetailsScreen extends StatelessWidget {
   }
 
   void _launchCaller(String? phone) async {
-    if (phone != null) {
-      final uri = Uri.parse('tel:$phone');
+    if (phone != null && phone.isNotEmpty) {
+      final cleanPhone = phone.replaceAll(RegExp(r'[^0-9+]'), '');
+      final uri = Uri.parse('tel:$cleanPhone');
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
       }

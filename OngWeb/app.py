@@ -4,6 +4,8 @@ import pymysql
 import pymysql.cursors
 from datetime import datetime
 import os
+import uuid
+
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -3557,7 +3559,7 @@ def api_ong_get_cases(current_ong_id):
             with conn.cursor() as cursor:
                 cursor.execute("""
                     SELECT c.*, 
-                           (SELECT file_url FROM media WHERE id_cas_social = c.id_cas_social LIMIT 1) as image
+                           (SELECT file_url FROM media WHERE id_cas_social = c.id_cas_social ORDER BY id_media DESC LIMIT 1) as image
                     FROM cas_social c
                     WHERE c.id_ong = %s
                     ORDER BY c.date_publication DESC
@@ -3643,6 +3645,75 @@ def api_ong_update_case(current_ong_id, id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/ong/profile/update', methods=['POST'])
+@token_required
+def api_ong_update_profile(current_ong_id):
+    """Update ONG profile details"""
+    try:
+        data = request.form
+        nom_ong = data.get('nom_ong')
+        telephone = data.get('telephone')
+        email = data.get('email')
+        adresse = data.get('adresse')
+        domaine = data.get('domaine')
+        description = data.get('description')
+        
+        # Handle logo upload
+        logo_filename = None
+        if 'logo' in request.files:
+            file = request.files['logo']
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+                # Create uploads/logos directory if not exists
+                logo_dir = os.path.join(app.root_path, 'static', 'uploads', 'logos')
+                os.makedirs(logo_dir, exist_ok=True)
+                
+                # Save unique filename
+                unique_filename = f"{uuid.uuid4()}_{filename}"
+                file.save(os.path.join(logo_dir, unique_filename))
+                logo_filename = f"uploads/logos/{unique_filename}"
+
+        with get_db() as conn:
+            with conn.cursor() as cursor:
+                # Update query builder
+                updates = []
+                params = []
+                
+                if nom_ong:
+                    updates.append("nom_ong = %s")
+                    params.append(nom_ong)
+                if telephone:
+                    updates.append("telephone = %s")
+                    params.append(telephone)
+                if email:
+                    updates.append("email = %s")
+                    params.append(email)
+                if adresse:
+                    updates.append("adresse = %s")
+                    params.append(adresse)
+                if domaine:
+                    updates.append("domaine_intervation = %s")
+                    params.append(domaine)
+                if description:
+                    updates.append("description = %s")
+                    params.append(description)
+                if logo_filename:
+                    updates.append("logo_url = %s")
+                    params.append(logo_filename)
+                
+                if updates:
+                    updates.append("update_at = NOW()")
+                    params.append(current_ong_id)
+                    
+                    sql = f"UPDATE ong SET {', '.join(updates)} WHERE id_ong = %s"
+                    cursor.execute(sql, params)
+                    conn.commit()
+                
+                return jsonify({'success': True, 'message': 'Profile updated successfully'})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 
 
@@ -3666,7 +3737,7 @@ def api_get_cases():
                            c.statut, c.latitude, c.longitude, c.wilaya, c.moughataa,
                            o.id_ong, o.nom_ong, o.telephone as ong_phone, o.email as ong_email, o.logo_url,
                            COALESCE(cat.nomCategorie, 'Autre') as categorie_nom,
-                           (SELECT file_url FROM media WHERE id_cas_social = c.id_cas_social LIMIT 1) as main_image
+                           (SELECT file_url FROM media WHERE id_cas_social = c.id_cas_social ORDER BY id_media DESC LIMIT 1) as main_image
                     FROM cas_social c
                     LEFT JOIN ong o ON c.id_ong = o.id_ong
                     LEFT JOIN categorie cat ON c.category_id = cat.idCategorie
@@ -3742,7 +3813,7 @@ def api_get_case_detail(id):
                     return jsonify({'status': 'error', 'message': 'Case not found'}), 404
 
                 # Media
-                cursor.execute("SELECT file_url, description_media FROM media WHERE id_cas_social = %s", (id,))
+                cursor.execute("SELECT file_url, description_media FROM media WHERE id_cas_social = %s ORDER BY id_media DESC", (id,))
                 media = cursor.fetchall()
 
                 result = {
@@ -4004,7 +4075,12 @@ def api_edit_case(current_ong_id, id):
                             filename = secure_filename(file.filename)
                             timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                             unique_filename = f"{timestamp}_{filename}"
-                            file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                            
+                            # Use absolute path
+                            upload_dir = os.path.join(app.root_path, 'static', 'uploads', 'media')
+                            os.makedirs(upload_dir, exist_ok=True)
+                            file_path = os.path.join(upload_dir, unique_filename)
+                            
                             file.save(file_path)
 
                             web_path = f"uploads/media/{unique_filename}"

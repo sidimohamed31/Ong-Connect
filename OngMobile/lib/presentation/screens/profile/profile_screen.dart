@@ -203,6 +203,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             pinned: true,
             actions: [
               IconButton(
+                icon: const Icon(Icons.edit, color: Colors.white),
+                onPressed: () => _showEditProfileDialog(context, ong),
+              ),
+              IconButton(
                 icon: const Icon(Icons.language),
                 onPressed: () => _showLanguageSelector(context),
               ),
@@ -508,5 +512,94 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       }
     }
+  }
+
+  void _showEditProfileDialog(BuildContext context, dynamic ong) {
+    if (ong == null) return;
+    final nameController = TextEditingController(text: ong.name);
+    final phoneController = TextEditingController(text: ong.phone ?? '');
+    final emailController = TextEditingController(text: ong.email ?? '');
+    final addressController = TextEditingController(text: ong.address ?? '');
+
+    // We can't access 'description' or 'domaine' from minimal Ong model easily without fetching full profile,
+    // but we'll try to use what we have or just these fields for now.
+    // If Ong model doesn't have them, we might need to fetch full profile first.
+    // For now, let's assume we basic fields are most important for contact info.
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Profile'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'ONG Name'),
+              ),
+              TextField(
+                controller: phoneController,
+                decoration: const InputDecoration(labelText: 'Public Phone'),
+                keyboardType: TextInputType.phone,
+              ),
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: 'Public Email'),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              TextField(
+                controller: addressController,
+                decoration: const InputDecoration(labelText: 'Address'),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Note: This updates your public contact info, not your login credentials.',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final fields = {
+                'nom_ong': nameController.text,
+                'telephone': phoneController.text,
+                'email': emailController.text,
+                'adresse': addressController.text,
+              };
+
+              Navigator.pop(context); // Close dialog
+              setState(() => _isLoading = true);
+
+              final success = await ApiService().updateOngProfile(fields, null);
+
+              if (mounted) {
+                setState(() => _isLoading = false);
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Profile updated successfully'),
+                    ),
+                  );
+                  // Reload profile
+                  _checkAuth();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to update profile')),
+                  );
+                }
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -32,13 +32,39 @@ class _AddEditCaseScreenState extends State<AddEditCaseScreen> {
   bool _isLoading = false;
 
   List<dynamic> _categories = [];
-  // Mock Wilayas data for now - ideally fetch from API or hardcoded map
+  // Complete Mauritania Wilayas and Moughataas
   final Map<String, List<String>> _locations = {
-    'Nouakchott Nord': ['Teyarett', 'Dar Naim', 'Toujounine'],
-    'Nouakchott Ouest': ['Ksar', 'Sebkha', 'Tevragh Zeina'],
+    'Adrar': ['Atar', 'Aoujeft', 'Chinguetti', 'Ouadane'],
+    'Assaba': ['Kiffa', 'Barkéol', 'Boumdeid', 'Guerou', 'Kankossa'],
+    'Brakna': ['Aleg', 'Bababé', 'Boghé', 'M\'Bagne', 'Magta-Lahjar'],
+    'Dakhlet Nouadhibou': ['Nouadhibou', 'Chami'],
+    'Gorgol': ['Kaédi', 'M\'Bout', 'Maghama', 'Monguel'],
+    'Guidimaka': ['Sélibaby', 'Ould Yengé', 'Ghabou', 'Wompou'],
+    'Hodh Ech Chargui': [
+      'Néma',
+      'Amourj',
+      'Bassikounou',
+      'Djiguenni',
+      'Oualata',
+      'Timbedra',
+      'Adel Bagrou',
+    ],
+    'Hodh El Gharbi': ['Aioun', 'Kobenni', 'Tamchakett', 'Tintane', 'Touil'],
+    'Inchiri': ['Akjoujt', 'Bennechab'],
+    'Nouakchott Nord': ['Dar-Naim', 'Teyarett', 'Toujounine'],
+    'Nouakchott Ouest': ['Ksar', 'Sebkha', 'Tevragh-Zeina'],
     'Nouakchott Sud': ['Arafat', 'El Mina', 'Riyad'],
-    'Nouadhibou': ['Nouadhibou'],
-    'Trarza': ['Rosso', 'Rkiz'],
+    'Tagant': ['Tidjikja', 'Moudjeria', 'Tichit'],
+    'Tiris Zemmour': ['Zouérat', 'Bir Moghrein', 'F\'Dérik'],
+    'Trarza': [
+      'Rosso',
+      'Boutilimit',
+      'Keur-Macène',
+      'Mederdra',
+      'Ouad Naga',
+      'R\'Kiz',
+      'Tekane',
+    ],
   };
 
   @override
@@ -193,51 +219,50 @@ class _AddEditCaseScreenState extends State<AddEditCaseScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Location
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        labelText: loc.wilaya,
-                        border: const OutlineInputBorder(),
+              // Location - Wilaya
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  labelText: loc.wilaya,
+                  border: const OutlineInputBorder(),
+                ),
+                value: _selectedWilaya,
+                isExpanded: true,
+                items: _locations.keys
+                    .map(
+                      (w) => DropdownMenuItem(
+                        value: w,
+                        child: Text(w, overflow: TextOverflow.ellipsis),
                       ),
-                      value: _selectedWilaya,
-                      items: _locations.keys
+                    )
+                    .toList(),
+                onChanged: (v) {
+                  setState(() {
+                    _selectedWilaya = v;
+                    _selectedMoughataa = null;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Location - Moughataa
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  labelText: loc.moughataa,
+                  border: const OutlineInputBorder(),
+                ),
+                value: _selectedMoughataa,
+                isExpanded: true,
+                items: _selectedWilaya == null
+                    ? []
+                    : (_locations[_selectedWilaya] ?? [])
                           .map(
-                            (w) => DropdownMenuItem(value: w, child: Text(w)),
+                            (m) => DropdownMenuItem(
+                              value: m,
+                              child: Text(m, overflow: TextOverflow.ellipsis),
+                            ),
                           )
                           .toList(),
-                      onChanged: (v) {
-                        setState(() {
-                          _selectedWilaya = v;
-                          _selectedMoughataa = null;
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        labelText: loc.moughataa,
-                        border: const OutlineInputBorder(),
-                      ),
-                      value: _selectedMoughataa,
-                      items: _selectedWilaya == null
-                          ? []
-                          : (_locations[_selectedWilaya] ?? [])
-                                .map(
-                                  (m) => DropdownMenuItem(
-                                    value: m,
-                                    child: Text(m),
-                                  ),
-                                )
-                                .toList(),
-                      onChanged: (v) => setState(() => _selectedMoughataa = v),
-                    ),
-                  ),
-                ],
+                onChanged: (v) => setState(() => _selectedMoughataa = v),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -267,34 +292,6 @@ class _AddEditCaseScreenState extends State<AddEditCaseScreen> {
                   ); // Value stays as API expects
                 }).toList(),
                 onChanged: (v) => setState(() => _selectedStatus = v),
-              ),
-              const SizedBox(height: 16),
-
-              // Date Publication
-              TextFormField(
-                controller: _dateController,
-                decoration: InputDecoration(
-                  labelText: loc.date,
-                  border: const OutlineInputBorder(),
-                  suffixIcon: const Icon(Icons.calendar_today),
-                ),
-                readOnly:
-                    true, // Make it pre-filled and read-only as requested "Auto-Incremented"
-                onTap: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2101),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      _dateController.text = pickedDate.toIso8601String().split(
-                        'T',
-                      )[0];
-                    });
-                  }
-                },
               ),
               const SizedBox(height: 24),
 

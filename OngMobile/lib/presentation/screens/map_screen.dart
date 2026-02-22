@@ -66,8 +66,8 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Center on Nouakchott
-    final center = LatLng(18.0735, -15.9582);
+    // Center on Mauritania
+    final center = LatLng(20.0, -12.0);
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -97,7 +97,7 @@ class _MapScreenState extends State<MapScreen> {
               ),
             )
           : FlutterMap(
-              options: MapOptions(initialCenter: center, initialZoom: 6.0),
+              options: MapOptions(initialCenter: center, initialZoom: 5.5),
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',

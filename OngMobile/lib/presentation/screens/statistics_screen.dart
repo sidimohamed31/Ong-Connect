@@ -285,6 +285,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
+                      reservedSize: 40, // Increased height for labels
                       getTitlesWidget: (value, meta) {
                         if (value.toInt() >= wilayaData.length) {
                           return const Text('');
@@ -292,14 +293,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         final label = wilayaData[value.toInt()]['wilaya'];
                         return Padding(
                           padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            label != null && label.length > 3
-                                ? '${label.substring(0, 3)}..'
-                                : label ?? '',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              color: CharifyTheme.mediumGrey,
+                          child: SizedBox(
+                            width: 50, // Constrain width to prevent overlap
+                            child: Text(
+                              label ?? '',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: CharifyTheme.mediumGrey,
+                              ),
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2, // Allow 2 lines
                             ),
                           ),
                         );
